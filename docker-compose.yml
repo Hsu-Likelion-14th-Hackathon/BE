@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:15.1
+    container_name: boardingpass_postgres
+    environment:
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: boardingpass
+      POSTGRES_USER: boardingpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - boardingpass_data:/var/lib/postgresql/data
+    networks:
+      - boardingpass-network
+
+  redis:
+    image: redis:7.0
+    container_name: boardingpass_redis
+    command: redis-server --requirepass mypassword
+    ports:
+      - "6379:6379"
+    networks:
+      - boardingpass-network
+
+volumes:
+  boardingpass_data:
+
+networks:
+  boardingpass-network:
+    driver: bridge

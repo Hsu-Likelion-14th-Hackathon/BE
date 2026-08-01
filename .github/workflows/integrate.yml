@@ -19,7 +19,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U myuser -d boardingpass"
+          --health-cmd="pg_isready -U boardingpass -d boardingpass"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -37,7 +37,7 @@ jobs:
     env:
       SPRING_ACTIVE_PROFILE: ci
       DB_URL: jdbc:postgresql://localhost:5432/boardingpass
-      DB_USER: myuser
+      DB_USER: boardingpass
       DB_PASSWORD: mypassword
       REDIS_HOST: localhost
       REDIS_PORT: 6379
@@ -70,11 +70,11 @@ jobs:
           set -e
 
           for i in {1..30}; do
-            pg_isready -h localhost -p 5432 -U myuser -d boardingpass && break
+            pg_isready -h localhost -p 5432 -U boardingpass -d boardingpass && break
             sleep 2
           done
 
-          psql -h localhost -p 5432 -U myuser -d boardingpass \
+          psql -h localhost -p 5432 -U boardingpass -d boardingpass \
             -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
       - name: PR 코드 단독 테스트
