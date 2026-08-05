@@ -52,8 +52,8 @@ public class ProductColor extends BaseEntity {
   @OrderBy("orderNo ASC")
   private List<ProductImage> images = new ArrayList<>();
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
-  // @OrderBy("orderNo ASC")
-  // private List<ProductSize> sizes = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
+  @OrderBy("orderNo ASC")
+  private List<ProductSize> sizes = new ArrayList<>();
 }
