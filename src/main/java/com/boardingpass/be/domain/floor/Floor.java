@@ -53,8 +53,8 @@ public class Floor extends BaseEntity {
   @Column(name = "audio_url", columnDefinition = "TEXT")
   private String audioUrl;
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "floor", fetch = FetchType.LAZY)
-  // @OrderBy("orderNo ASC")
-  // private List<FloorContent> contents = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "floor", fetch = FetchType.LAZY)
+  @OrderBy("orderNo ASC")
+  private List<FloorContent> contents = new ArrayList<>();
 }
