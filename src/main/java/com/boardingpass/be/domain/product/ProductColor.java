@@ -47,10 +47,10 @@ public class ProductColor extends BaseEntity {
   @Column(name = "is_default", nullable = false)
   private boolean isDefault = false;
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
-  // @OrderBy("orderNo ASC")
-  // private List<ProductImage> images = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
+  @OrderBy("orderNo ASC")
+  private List<ProductImage> images = new ArrayList<>();
 
   // @Builder.Default
   // @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
