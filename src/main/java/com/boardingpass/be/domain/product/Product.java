@@ -46,8 +46,8 @@ public class Product extends BaseEntity {
   @Column(name = "popularity_rank")
   private Integer popularityRank;
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-  // @OrderBy("isDefault DESC, id ASC")
-  // private List<ProductColor> colors = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+  @OrderBy("isDefault DESC, id ASC")
+  private List<ProductColor> colors = new ArrayList<>();
 }
