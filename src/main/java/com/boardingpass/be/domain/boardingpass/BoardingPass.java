@@ -51,9 +51,9 @@ public class BoardingPass extends BaseEntity {
   @Column(name = "status", length = 20, nullable = false)
   private BoardingPassStatus status;
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
-  // private List<BoardingPassItem> items = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
+  private List<BoardingPassItem> items = new ArrayList<>();
 
   // @Builder.Default
   // @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
