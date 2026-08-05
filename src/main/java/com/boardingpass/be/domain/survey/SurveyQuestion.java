@@ -41,8 +41,8 @@ public class SurveyQuestion extends BaseEntity {
   @Column(name = "is_active", nullable = false)
   private boolean isActive = true;
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "surveyQuestion", fetch = FetchType.LAZY)
-  // @OrderBy("orderNo ASC")
-  // private List<SurveyOption> options = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "surveyQuestion", fetch = FetchType.LAZY)
+  @OrderBy("orderNo ASC")
+  private List<SurveyOption> options = new ArrayList<>();
 }
