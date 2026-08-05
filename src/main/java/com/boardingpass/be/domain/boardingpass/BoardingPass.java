@@ -55,9 +55,9 @@ public class BoardingPass extends BaseEntity {
   @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
   private List<BoardingPassItem> items = new ArrayList<>();
 
-  // @Builder.Default
-  // @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
-  // private List<BoardingPassSurvey> surveys = new ArrayList<>();
+  @Builder.Default
+  @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
+  private List<BoardingPassSurvey> surveys = new ArrayList<>();
 
   public boolean isIssued() {
     return this.status == BoardingPassStatus.ISSUED;
