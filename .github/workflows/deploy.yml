@@ -1,4 +1,4 @@
-name: EC2 deploy
+name: Azure VM deploy
 
 on:
   push:
@@ -6,13 +6,14 @@ on:
       - "main"
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+  IMAGE_NAME: boardingpass-be
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: GitHub 저장소 체크아웃
@@ -26,148 +27,89 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
+          cache: gradle
 
       - name: Spring Boot JAR 빌드 (테스트 제외)
         run: ./gradlew clean bootJar -x test
 
-      - name: AWS 자격 증명 설정
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: ECR 리포지토리 존재 여부 확인 및 생성
-        run: |
-          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" --region "$AWS_REGION" >/dev/null 2>&1 \
-          || aws ecr create-repository --repository-name "$ECR_REPOSITORY" --region "$AWS_REGION"
-
-      - name: Amazon ECR 로그인
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Docker 이미지 태그 생성
+      - name: 이미지 이름/태그 생성
         id: meta
-        run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-
-      - name: Docker 이미지 빌드 및 태깅
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.meta.outputs.tag }} .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.meta.outputs.tag }} $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO_LC=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${OWNER_LC}/${REPO_LC}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
-      - name: Docker 이미지 ECR에 푸시
-        run: |
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.meta.outputs.tag }}
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+      - name: GHCR 로그인
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: SSM으로 EC2에 배포
-        id: ssm
-        run: |
-          set -euo pipefail
+      - name: Docker Buildx 설정
+        uses: docker/setup-buildx-action@v3
 
-          REGION="${{ secrets.AWS_REGION }}"
-          INSTANCE_ID="${{ secrets.EC2_INSTANCE_ID }}"
-          TAG="${{ steps.meta.outputs.tag }}"
-          ECR_IMAGE="${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}"
+      - name: Docker 이미지 빌드 및 푸시 (linux/amd64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag }}
+            ${{ steps.meta.outputs.image }}:latest
 
-          COMMAND_ID=$(aws ssm send-command \
-            --region "$REGION" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy via GitHub Actions (docker compose)" \
-            --targets "Key=instanceids,Values=$INSTANCE_ID" \
-            --parameters commands="[
-              \"set -e\",
-              \"export AWS_REGION=$REGION\",
-              \"export ECR_IMAGE=$ECR_IMAGE\",
-              \"export IMAGE_TAG=$TAG\",
-              \"/home/ubuntu/app/deploy.sh\"
-            ]" \
-            --query "Command.CommandId" \
-            --output text)
+      - name: Azure VM에 SSH 배포
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -euo pipefail
 
-          echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
-          echo "SSM CommandId: $COMMAND_ID"
+            IMAGE="${{ steps.meta.outputs.image }}"
+            TAG="${{ steps.meta.outputs.tag }}"
 
-      - name: SSM 실행 결과 대기
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          aws ssm wait command-executed \
-            --region "${{ secrets.AWS_REGION }}" \
-            --command-id "${{ steps.ssm.outputs.command_id }}" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}"
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: SSM 로그 출력 + 실패 처리
-        run: |
-          set -euo pipefail
+            docker pull "${IMAGE}:${TAG}"
 
-          REGION="${{ secrets.AWS_REGION }}"
-          CMD="${{ steps.ssm.outputs.command_id }}"
-          INSTANCE="${{ secrets.EC2_INSTANCE_ID }}"
+            docker rm -f boardingpass-be || true
 
-          STATUS=$(aws ssm get-command-invocation \
-            --region "$REGION" \
-            --command-id "$CMD" \
-            --instance-id "$INSTANCE" \
-            --query "Status" \
-            --output text)
+            docker run -d \
+              --name boardingpass-be \
+              --restart unless-stopped \
+              --add-host=host.docker.internal:host-gateway \
+              -p 8080:8080 \
+              --env-file /home/azureuser/.env \
+              "${IMAGE}:${TAG}"
 
-          echo "SSM Status: $STATUS"
-          echo "---- STDOUT ----"
-          aws ssm get-command-invocation \
-            --region "$REGION" \
-            --command-id "$CMD" \
-            --instance-id "$INSTANCE" \
-            --query "StandardOutputContent" \
-            --output text || true
-          echo "---- STDERR ----"
-          aws ssm get-command-invocation \
-            --region "$REGION" \
-            --command-id "$CMD" \
-            --instance-id "$INSTANCE" \
-            --query "StandardErrorContent" \
-            --output text || true
-
-          if [ "$STATUS" != "Success" ]; then
-            echo "SSM command failed."
-            exit 1
-          fi
+            docker image prune -f || true
 
       - name: Discord 알림
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "Discord webhook 미설정, 스킵"
+            exit 0
+          fi
+
           SHA="${GITHUB_SHA::7}"
           BRANCH="${GITHUB_REF_NAME}"
-          TAG="${GITHUB_SHA::7}"
           RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
 
           TITLE="🚀 배포 성공"
           COLOR=5763719
-          EXTRA_FIELD=""
-
           if [ "${{ job.status }}" != "success" ]; then
             TITLE="❌ 배포 실패"
             COLOR=15548997
-
-            CMD="${{ steps.ssm.outputs.command_id }}"
-            STDERR=$(aws ssm get-command-invocation \
-              --region "$AWS_REGION" \
-              --command-id "$CMD" \
-              --instance-id "$INSTANCE_ID" \
-              --query "StandardErrorContent" \
-              --output text 2>/dev/null \
-              | tail -n 10 \
-              | sed 's/\\/\\\\/g; s/\"/\\\"/g; s/\r//g' \
-              | cut -c 1-900 || true)     
-          
-            [ -z "$STDERR" ] && STDERR="(stderr 없음)"
-            EXTRA_FIELD=", {\"name\":\"SSM STDERR (last 10 lines)\",\"value\":\"\`\`\`$STDERR\`\`\`\"}"
           fi
 
           curl -sS -H "Content-Type: application/json" -X POST \
@@ -178,14 +120,11 @@ jobs:
                 \"fields\": [
                   {\"name\": \"Repository\", \"value\": \"${GITHUB_REPOSITORY}\", \"inline\": false},
                   {\"name\": \"Branch\", \"value\": \"${BRANCH}\", \"inline\": false},
-                  {\"name\": \"Container Version\", \"value\": \"${TAG}\", \"inline\": false},
+                  {\"name\": \"Image Tag\", \"value\": \"${SHA}\", \"inline\": false},
                   {\"name\": \"Actor\", \"value\": \"${GITHUB_ACTOR}\", \"inline\": false},
                   {\"name\": \"Commit\", \"value\": \"${COMMIT_URL}\", \"inline\": false},
                   {\"name\": \"Actions Run\", \"value\": \"${RUN_URL}\", \"inline\": false}
-                  $EXTRA_FIELD
                 ]
               }]
             }" \
             "$DISCORD_WEBHOOK_URL" || true
-
-
