@@ -17,11 +17,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Getter
 @Builder
-@Table(name = "boarding_pass_survey")
+@Table(
+  name = "boarding_pass_survey",
+  uniqueConstraints = @UniqueConstraint(
+      name = "uk_boarding_pass_survey_question",
+      columnNames = {"boarding_pass_id", "survey_question_id"}))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BoardingPassSurvey extends BaseEntity {
