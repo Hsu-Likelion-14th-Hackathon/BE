@@ -16,6 +16,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
   UNSUPPORTED_FILE_TYPE(HttpStatus.BAD_REQUEST, "FILE4002", "지원하지 않는 이미지 형식입니다."),
   INVALID_FILE_KEY(HttpStatus.BAD_REQUEST, "FILE4003", "유효하지 않은 파일 키입니다."),
+  BODY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "BODY_IMAGE_NOT_FOUND", "저장된 바디 이미지가 없습니다."),
   FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE5001", "파일 업로드 URL 발급에 실패했습니다."),
 
   MALFORMED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4101", "잘못 구성된 JWT 형식입니다."),
