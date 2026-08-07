@@ -59,6 +59,9 @@ dependencies {
 
 	// Spring Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	// Azure Blob Storage
+	implementation 'com.azure:azure-storage-blob:12.29.0'
 }
 
 tasks.named('test') {

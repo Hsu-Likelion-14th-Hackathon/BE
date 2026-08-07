@@ -29,3 +29,8 @@ cors:
 
 swagger:
   server-url: http://localhost:8080
+
+azure:
+  storage:
+    connection-string: "DefaultEndpointsProtocol=https;AccountName=devstoreaccount1;AccountKey=dGVzdA==;EndpointSuffix=core.windows.net"
+    container-name: test-container
