@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "User", description = "회원 API")
 @RestController
-@RequestMapping("/api/v1/users/me")
+@RequestMapping("/users/me")
 @RequiredArgsConstructor
 public class UserBodyImageController {
 

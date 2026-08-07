@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Fitting", description = "AI 피팅 API")
 @RestController
-@RequestMapping("/api/v1/fitting-sessions")
+@RequestMapping("/fitting-sessions")
 @RequiredArgsConstructor
 public class FittingUploadController {
 
