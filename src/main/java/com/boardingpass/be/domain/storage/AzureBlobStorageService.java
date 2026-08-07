@@ -31,7 +31,7 @@ public class AzureBlobStorageService {
     String fileKey = "fitting/tmp/" + UUID.randomUUID() + "_" + safeName;
 
     try {
-      BlobClient blobClient = blobContainerClient.getBlobClient(fileKey);
+      BlobClient blobClient = container().getBlobClient(fileKey);
 
       BlobSasPermission permission = new BlobSasPermission()
           .setCreatePermission(true)
@@ -51,12 +51,17 @@ public class AzureBlobStorageService {
 
   public String createReadUrl(String fileKey) {
     validateFileKey(fileKey);
-    BlobClient blobClient = blobContainerClient.getBlobClient(fileKey);
+    BlobClient blobClient = container().getBlobClient(fileKey);
 
     BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
     OffsetDateTime expiry = OffsetDateTime.now().plusDays(30);
     String sas = blobClient.generateSas(new BlobServiceSasSignatureValues(expiry, permission));
     return blobClient.getBlobUrl() + "?" + sas;
+  }
+
+  private BlobContainerClient container() {
+    blobContainerClient.createIfNotExists();
+    return blobContainerClient;
   }
 
   public void validateFileKey(String fileKey) {

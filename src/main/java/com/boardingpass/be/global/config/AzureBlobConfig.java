@@ -22,10 +22,6 @@ public class AzureBlobConfig {
         .connectionString(connectionString)
         .buildClient();
 
-    BlobContainerClient containerClient = serviceClient.getBlobContainerClient(containerName);
-    if (!containerClient.exists()) {
-      containerClient.create();
-    }
-    return containerClient;
+    return serviceClient.getBlobContainerClient(containerName);
   }
 }
