@@ -19,6 +19,9 @@ public enum ErrorStatus implements BaseErrorCode {
   BODY_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "BODY_IMAGE_NOT_FOUND", "저장된 바디 이미지가 없습니다."),
   FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FILE5001", "파일 업로드 URL 발급에 실패했습니다."),
 
+  STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장 정보를 찾을 수 없습니다."),
+  FLOOR_NOT_FOUND(HttpStatus.NOT_FOUND, "FLOOR_NOT_FOUND", "존재하지 않는 층입니다."),
+
   MALFORMED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4101", "잘못 구성된 JWT 형식입니다."),
   UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4102", "지원하지 않는 JWT 형식입니다."),
   EMPTY_JWT_CLAIMS(HttpStatus.BAD_REQUEST, "AUTH4103", "JWT 클레임이 비어 있습니다."),
