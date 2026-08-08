@@ -47,7 +47,7 @@ public class ProductSize extends BaseEntity {
   @Column(name = "sku", length = 50, nullable = false)
   private String sku;
 
-  @Column(name = "stock", nullable = false)
+  @Column(name = "stock")
   private Integer stock;
 
   @Column(name = "order_no", nullable = false)
