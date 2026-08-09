@@ -9,6 +9,7 @@ public record FloorDetailResponse(
     Integer floorNo,
     String code,
     String title,
+    String subtitle,
     String tagline,
     String audioUrl,
     List<FloorContentResponse> contents
@@ -24,6 +25,7 @@ public record FloorDetailResponse(
         floor.getFloorNo(),
         floor.getCode(),
         floor.getTitle(),
+        blankToNull(floor.getSubtitle()),
         floor.getTagline(),
         blankToNull(floor.getAudioUrl()),
         contents

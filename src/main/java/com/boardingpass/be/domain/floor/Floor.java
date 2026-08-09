@@ -50,6 +50,9 @@ public class Floor extends BaseEntity {
   @Column(name = "tagline", length = 200)
   private String tagline;
 
+  @Column(name = "subtitle", length = 100)
+  private String subtitle;
+
   @Column(name = "audio_url", columnDefinition = "TEXT")
   private String audioUrl;
 
