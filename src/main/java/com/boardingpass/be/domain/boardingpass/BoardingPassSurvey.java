@@ -44,7 +44,10 @@ public class BoardingPassSurvey extends BaseEntity {
   @JoinColumn(name = "survey_question_id")
   private SurveyQuestion surveyQuestion;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "survey_option_id")
   private SurveyOption surveyOption;
+
+  @Column(name = "text_answer", length = 200)
+  private String textAnswer;
 }

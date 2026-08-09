@@ -43,4 +43,7 @@ public class RouteStep extends BaseEntity {
 
   @Column(name = "reason", columnDefinition = "TEXT")
   private String reason;
+
+  @Column(name = "is_recommended", nullable = false)
+  private Boolean isRecommended;
 }

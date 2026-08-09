@@ -52,6 +52,10 @@ public class BoardingPass extends BaseEntity {
   private BoardingPassStatus status;
 
   @Builder.Default
+  @Column(name = "data_consent", nullable = false)
+  private Boolean dataConsent = false;
+
+  @Builder.Default
   @OneToMany(mappedBy = "boardingPass", fetch = FetchType.LAZY)
   private List<BoardingPassItem> items = new ArrayList<>();
 
