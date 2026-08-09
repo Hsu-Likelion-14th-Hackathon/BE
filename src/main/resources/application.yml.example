@@ -52,3 +52,8 @@ logging:
   level:
     root: INFO
     com.boardingpass.be: DEBUG
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
+  model: gpt-4o-mini
+  timeout-seconds: 5
