@@ -7,6 +7,7 @@ public record FloorSummaryResponse(
     Integer floorNo,
     String code,
     String title,
+    String subtitle,
     String tagline,
     String audioUrl
 ) {
@@ -16,6 +17,7 @@ public record FloorSummaryResponse(
         floor.getFloorNo(),
         floor.getCode(),
         floor.getTitle(),
+        blankToNull(floor.getSubtitle()),
         floor.getTagline(),
         blankToNull(floor.getAudioUrl())
     );
