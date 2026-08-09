@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Getter
@@ -36,6 +38,13 @@ public class SurveyQuestion extends BaseEntity {
 
   @Column(name = "content", columnDefinition = "TEXT", nullable = false)
   private String content;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "question_type", length = 20, nullable = false)
+  private QuestionType questionType;
+
+  @Column(name = "is_required", nullable = false)
+  private Boolean isRequired;
 
   @Builder.Default
   @Column(name = "is_active", nullable = false)
