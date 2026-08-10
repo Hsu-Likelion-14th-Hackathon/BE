@@ -25,6 +25,11 @@ public enum ErrorStatus implements BaseErrorCode {
   SURVEY_INCOMPLETE(HttpStatus.BAD_REQUEST, "SURVEY_INCOMPLETE", "필수 설문 문항에 모두 응답해야 합니다."),
   INVALID_SURVEY_ANSWER(HttpStatus.BAD_REQUEST, "INVALID_SURVEY_ANSWER", "설문 응답이 올바르지 않습니다."),
 
+  KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
+  PROFILE_ALREADY_REGISTERED(HttpStatus.CONFLICT, "PROFILE_ALREADY_REGISTERED", "이미 추가 정보가 등록된 회원입니다."),
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
+  INVALID_NATIONALITY(HttpStatus.BAD_REQUEST, "INVALID_NATIONALITY", "국적은 ISO 3166-1 alpha-2 형식의 2자리 코드여야 합니다."),
+
   MALFORMED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4101", "잘못 구성된 JWT 형식입니다."),
   UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4102", "지원하지 않는 JWT 형식입니다."),
   EMPTY_JWT_CLAIMS(HttpStatus.BAD_REQUEST, "AUTH4103", "JWT 클레임이 비어 있습니다."),
