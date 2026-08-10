@@ -2,6 +2,7 @@ package com.boardingpass.be.domain.auth.kakao;
 
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,11 +15,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * 카카오 인가코드를 액세스 토큰으로 교환하고, 그 토큰으로 사용자 정보를 조회합니다.
- * redirect_uri는 인가 코드를 발급받을 때 프론트가 사용한 값과 동일해야 하므로 요청에서 그대로 전달받습니다.
- */
 @Component
+@RequiredArgsConstructor
 public class KakaoAuthClient {
 
   private static final String TOKEN_URI = "https://kauth.kakao.com/oauth/token";
@@ -28,10 +26,6 @@ public class KakaoAuthClient {
 
   @Value("${kakao.client-id}")
   private String clientId;
-
-  public KakaoAuthClient(RestTemplate restTemplate) {
-    this.restTemplate = restTemplate;
-  }
 
   public KakaoUserInfo authenticate(String code, String redirectUri) {
     String kakaoAccessToken = requestAccessToken(code, redirectUri);
