@@ -39,3 +39,6 @@ openai:
   api-key:
   model: gpt-4o-mini
   timeout-seconds: 5
+
+kakao:
+  client-id: test-client-id
