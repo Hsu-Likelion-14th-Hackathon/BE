@@ -39,7 +39,9 @@ public class SecurityConfig {
                 "/v3/api-docs/**",
                 "/swagger-ui.html",
                 "/api/health/**",
-                "/auth/kakao"
+                "/auth/kakao",
+                "/products",
+                "/products/**"
             ).permitAll()
             .anyRequest().authenticated()
         )
