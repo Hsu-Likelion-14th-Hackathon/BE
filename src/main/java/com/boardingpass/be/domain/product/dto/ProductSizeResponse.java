@@ -6,6 +6,7 @@ public record ProductSizeResponse(
     Long productSizeId,
     String sizeLabel,
     String sizeNote,
+    String sku,
     Integer stock
 ) {
   public static ProductSizeResponse from(ProductSize size) {
@@ -13,6 +14,7 @@ public record ProductSizeResponse(
         size.getId(),
         size.getSizeLabel(),
         size.getSizeNote(),
+        size.getSku(),
         size.getStock()
     );
   }
