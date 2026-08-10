@@ -1,8 +1,9 @@
-package com.boardingpass.be.domain.user;
+package com.boardingpass.be.domain.user.controller;
 
 import com.boardingpass.be.domain.user.dto.UserMeResponse;
 import com.boardingpass.be.domain.user.dto.UserUpdateRequest;
 import com.boardingpass.be.domain.user.dto.UserUpdateResponse;
+import com.boardingpass.be.domain.user.service.UserService;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

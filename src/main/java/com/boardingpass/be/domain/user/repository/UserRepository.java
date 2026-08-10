@@ -1,5 +1,7 @@
-package com.boardingpass.be.domain.user;
+package com.boardingpass.be.domain.user.repository;
 
+import com.boardingpass.be.domain.user.Provider;
+import com.boardingpass.be.domain.user.User;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

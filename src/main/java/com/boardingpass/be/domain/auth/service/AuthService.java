@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.auth;
+package com.boardingpass.be.domain.auth.service;
 
 import com.boardingpass.be.domain.auth.dto.KakaoLoginRequest;
 import com.boardingpass.be.domain.auth.dto.KakaoLoginResponse;
@@ -9,7 +9,7 @@ import com.boardingpass.be.domain.auth.kakao.KakaoUserInfo;
 import com.boardingpass.be.domain.user.NationalityValidator;
 import com.boardingpass.be.domain.user.Provider;
 import com.boardingpass.be.domain.user.User;
-import com.boardingpass.be.domain.user.UserRepository;
+import com.boardingpass.be.domain.user.repository.UserRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
 import com.boardingpass.be.global.jwt.JwtProvider;

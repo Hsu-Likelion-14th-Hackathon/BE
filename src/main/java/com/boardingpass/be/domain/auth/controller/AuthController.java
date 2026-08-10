@@ -1,9 +1,10 @@
-package com.boardingpass.be.domain.auth;
+package com.boardingpass.be.domain.auth.controller;
 
 import com.boardingpass.be.domain.auth.dto.KakaoLoginRequest;
 import com.boardingpass.be.domain.auth.dto.KakaoLoginResponse;
 import com.boardingpass.be.domain.auth.dto.ProfileRequest;
 import com.boardingpass.be.domain.auth.dto.ProfileResponse;
+import com.boardingpass.be.domain.auth.service.AuthService;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

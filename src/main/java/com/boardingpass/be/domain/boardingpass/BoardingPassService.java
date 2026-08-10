@@ -20,7 +20,7 @@ import com.boardingpass.be.domain.survey.SurveyOption;
 import com.boardingpass.be.domain.survey.SurveyQuestion;
 import com.boardingpass.be.domain.survey.SurveyQuestionRepository;
 import com.boardingpass.be.domain.user.User;
-import com.boardingpass.be.domain.user.UserRepository;
+import com.boardingpass.be.domain.user.repository.UserRepository;
 import com.boardingpass.be.domain.wishlist.Wishlist;
 import com.boardingpass.be.domain.wishlist.WishlistRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;

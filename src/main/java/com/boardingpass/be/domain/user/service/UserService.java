@@ -1,8 +1,11 @@
-package com.boardingpass.be.domain.user;
+package com.boardingpass.be.domain.user.service;
 
+import com.boardingpass.be.domain.user.NationalityValidator;
+import com.boardingpass.be.domain.user.User;
 import com.boardingpass.be.domain.user.dto.UserMeResponse;
 import com.boardingpass.be.domain.user.dto.UserUpdateRequest;
 import com.boardingpass.be.domain.user.dto.UserUpdateResponse;
+import com.boardingpass.be.domain.user.repository.UserRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
 import com.boardingpass.be.global.security.SecurityUtils;
