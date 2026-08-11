@@ -25,6 +25,9 @@ public enum ErrorStatus implements BaseErrorCode {
   SURVEY_INCOMPLETE(HttpStatus.BAD_REQUEST, "SURVEY_INCOMPLETE", "필수 설문 문항에 모두 응답해야 합니다."),
   INVALID_SURVEY_ANSWER(HttpStatus.BAD_REQUEST, "INVALID_SURVEY_ANSWER", "설문 응답이 올바르지 않습니다."),
 
+  PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "존재하지 않는 상품입니다."),
+  PRODUCT_COLOR_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_COLOR_NOT_FOUND", "상품에 등록된 색상이 없습니다."),
+
   KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
   PROFILE_ALREADY_REGISTERED(HttpStatus.CONFLICT, "PROFILE_ALREADY_REGISTERED", "이미 추가 정보가 등록된 회원입니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
