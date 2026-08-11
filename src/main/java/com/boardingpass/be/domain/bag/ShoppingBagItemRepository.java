@@ -15,4 +15,8 @@ public interface ShoppingBagItemRepository extends JpaRepository<ShoppingBagItem
       where s.user.id = :userId
       """)
   List<ShoppingBagItem> findByUserIdWithProduct(@Param("userId") Long userId);
+
+  boolean existsByUserIdAndProductSizeId(Long userId, Long productSizeId);
+
+  void deleteByIdAndUserId(Long id, Long userId);
 }
