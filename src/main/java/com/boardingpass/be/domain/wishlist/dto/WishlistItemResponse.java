@@ -14,7 +14,10 @@ public record WishlistItemResponse(
     String colorName
 ) {
   public static WishlistItemResponse from(Wishlist wishlist) {
-    ProductColor color = wishlist.getProductColor();
+    return from(wishlist.getProductColor());
+  }
+
+  public static WishlistItemResponse from(ProductColor color) {
     return new WishlistItemResponse(
         color.getId(),
         color.getProduct().getId(),
