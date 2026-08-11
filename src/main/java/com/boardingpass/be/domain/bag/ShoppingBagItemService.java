@@ -1,6 +1,7 @@
 package com.boardingpass.be.domain.bag;
 
 import com.boardingpass.be.domain.bag.dto.ShoppingBagCreateRequest;
+import com.boardingpass.be.domain.bag.dto.ShoppingBagDeleteResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagItemResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagListResponse;
 import com.boardingpass.be.domain.product.ProductSize;
@@ -24,11 +25,14 @@ public class ShoppingBagItemService {
   private final ProductSizeRepository productSizeRepository;
 
   @Transactional
-  public void addShoppingBagItem(ShoppingBagCreateRequest request) {
+  public ShoppingBagItemResponse addShoppingBagItem(ShoppingBagCreateRequest request) {
     Long userId = SecurityUtils.getCurrentUserId();
 
-    if (shoppingBagItemRepository.existsByUserIdAndProductSizeId(userId, request.productSizeId())) {
-      return;
+    ShoppingBagItem existing = shoppingBagItemRepository
+        .findByUserIdAndProductSizeId(userId, request.productSizeId())
+        .orElse(null);
+    if (existing != null) {
+      return ShoppingBagItemResponse.from(existing);
     }
 
     User user = userRepository.findById(userId)
@@ -40,12 +44,14 @@ public class ShoppingBagItemService {
       throw new GeneralException(ErrorStatus.STOCK_EXCEEDED);
     }
 
-    shoppingBagItemRepository.save(
+    ShoppingBagItem saved = shoppingBagItemRepository.save(
         ShoppingBagItem.builder()
             .user(user)
             .productSize(productSize)
             .build()
     );
+
+    return ShoppingBagItemResponse.from(saved);
   }
 
   public ShoppingBagListResponse getShoppingBag() {
@@ -59,8 +65,9 @@ public class ShoppingBagItemService {
   }
 
   @Transactional
-  public void removeShoppingBagItem(Long shoppingBagItemId) {
+  public ShoppingBagDeleteResponse removeShoppingBagItem(Long shoppingBagItemId) {
     Long userId = SecurityUtils.getCurrentUserId();
     shoppingBagItemRepository.deleteByIdAndUserId(shoppingBagItemId, userId);
+    return new ShoppingBagDeleteResponse(true);
   }
 }
