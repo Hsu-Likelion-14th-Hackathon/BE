@@ -5,6 +5,7 @@ import com.boardingpass.be.domain.product.ProductColorRepository;
 import com.boardingpass.be.domain.user.User;
 import com.boardingpass.be.domain.user.repository.UserRepository;
 import com.boardingpass.be.domain.wishlist.dto.WishlistCreateRequest;
+import com.boardingpass.be.domain.wishlist.dto.WishlistDeleteResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistItemResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistListResponse;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
@@ -57,8 +58,9 @@ public class WishlistService {
   }
 
   @Transactional
-  public void removeWishlist(Long productColorId) {
+  public WishlistDeleteResponse removeWishlist(Long productColorId) {
     Long userId = SecurityUtils.getCurrentUserId();
     wishlistRepository.deleteByUserIdAndProductColorId(userId, productColorId);
+    return new WishlistDeleteResponse(true);
   }
 }
