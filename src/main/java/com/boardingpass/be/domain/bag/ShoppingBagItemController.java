@@ -1,6 +1,8 @@
 package com.boardingpass.be.domain.bag;
 
 import com.boardingpass.be.domain.bag.dto.ShoppingBagCreateRequest;
+import com.boardingpass.be.domain.bag.dto.ShoppingBagDeleteResponse;
+import com.boardingpass.be.domain.bag.dto.ShoppingBagItemResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagListResponse;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,9 +27,10 @@ public class ShoppingBagItemController {
 
   @Operation(summary = "쇼핑백 담기")
   @PostMapping
-  public ApiResponse<Void> addShoppingBagItem(@Valid @RequestBody ShoppingBagCreateRequest request) {
-    shoppingBagItemService.addShoppingBagItem(request);
-    return ApiResponse.onSuccess(null);
+  public ApiResponse<ShoppingBagItemResponse> addShoppingBagItem(
+      @Valid @RequestBody ShoppingBagCreateRequest request
+  ) {
+    return ApiResponse.onSuccess(shoppingBagItemService.addShoppingBagItem(request));
   }
 
   @Operation(summary = "쇼핑백 조회")
@@ -38,8 +41,7 @@ public class ShoppingBagItemController {
 
   @Operation(summary = "쇼핑백 항목 삭제")
   @DeleteMapping("/{shoppingBagItemId}")
-  public ApiResponse<Void> removeShoppingBagItem(@PathVariable Long shoppingBagItemId) {
-    shoppingBagItemService.removeShoppingBagItem(shoppingBagItemId);
-    return ApiResponse.onSuccess(null);
+  public ApiResponse<ShoppingBagDeleteResponse> removeShoppingBagItem(@PathVariable Long shoppingBagItemId) {
+    return ApiResponse.onSuccess(shoppingBagItemService.removeShoppingBagItem(shoppingBagItemId));
   }
 }
