@@ -1,6 +1,8 @@
 package com.boardingpass.be.domain.wishlist;
 
 import com.boardingpass.be.domain.wishlist.dto.WishlistCreateRequest;
+import com.boardingpass.be.domain.wishlist.dto.WishlistDeleteResponse;
+import com.boardingpass.be.domain.wishlist.dto.WishlistItemResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistListResponse;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,9 +27,8 @@ public class WishlistController {
 
   @Operation(summary = "위시리스트 담기")
   @PostMapping
-  public ApiResponse<Void> addWishlist(@Valid @RequestBody WishlistCreateRequest request) {
-    wishlistService.addWishlist(request);
-    return ApiResponse.onSuccess(null);
+  public ApiResponse<WishlistItemResponse> addWishlist(@Valid @RequestBody WishlistCreateRequest request) {
+    return ApiResponse.onSuccess(wishlistService.addWishlist(request));
   }
 
   @Operation(summary = "위시리스트 조회")
@@ -38,8 +39,7 @@ public class WishlistController {
 
   @Operation(summary = "위시리스트 삭제")
   @DeleteMapping("/{productColorId}")
-  public ApiResponse<Void> removeWishlist(@PathVariable Long productColorId) {
-    wishlistService.removeWishlist(productColorId);
-    return ApiResponse.onSuccess(null);
+  public ApiResponse<WishlistDeleteResponse> removeWishlist(@PathVariable Long productColorId) {
+    return ApiResponse.onSuccess(wishlistService.removeWishlist(productColorId));
   }
 }
