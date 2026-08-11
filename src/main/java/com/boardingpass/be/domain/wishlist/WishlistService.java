@@ -24,17 +24,17 @@ public class WishlistService {
   private final ProductColorRepository productColorRepository;
 
   @Transactional
-  public void addWishlist(WishlistCreateRequest request) {
+  public WishlistItemResponse addWishlist(WishlistCreateRequest request) {
     Long userId = SecurityUtils.getCurrentUserId();
+    ProductColor productColor = productColorRepository.findById(request.productColorId())
+        .orElseThrow(() -> new GeneralException(ErrorStatus.PRODUCT_COLOR_NOT_FOUND));
 
-    if (wishlistRepository.existsByUserIdAndProductColorId(userId, request.productColorId())) {
-      return;
+    if (wishlistRepository.existsByUserIdAndProductColorId(userId, productColor.getId())) {
+      return WishlistItemResponse.from(productColor);
     }
 
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-    ProductColor productColor = productColorRepository.findById(request.productColorId())
-        .orElseThrow(() -> new GeneralException(ErrorStatus.PRODUCT_COLOR_NOT_FOUND));
 
     wishlistRepository.save(
         Wishlist.builder()
@@ -42,6 +42,8 @@ public class WishlistService {
             .productColor(productColor)
             .build()
     );
+
+    return WishlistItemResponse.from(productColor);
   }
 
   public WishlistListResponse getWishlist() {
