@@ -1,9 +1,11 @@
-package com.boardingpass.be.domain.bag;
+package com.boardingpass.be.domain.bag.service;
 
 import com.boardingpass.be.domain.bag.dto.ShoppingBagCreateRequest;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagDeleteResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagItemResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagListResponse;
+import com.boardingpass.be.domain.bag.entity.ShoppingBagItem;
+import com.boardingpass.be.domain.bag.repository.ShoppingBagItemRepository;
 import com.boardingpass.be.domain.product.ProductSize;
 import com.boardingpass.be.domain.product.ProductSizeRepository;
 import com.boardingpass.be.domain.user.User;

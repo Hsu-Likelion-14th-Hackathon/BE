@@ -1,9 +1,10 @@
-package com.boardingpass.be.domain.wishlist;
+package com.boardingpass.be.domain.wishlist.controller;
 
 import com.boardingpass.be.domain.wishlist.dto.WishlistCreateRequest;
 import com.boardingpass.be.domain.wishlist.dto.WishlistDeleteResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistItemResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistListResponse;
+import com.boardingpass.be.domain.wishlist.service.WishlistService;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

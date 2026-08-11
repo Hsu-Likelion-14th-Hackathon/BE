@@ -1,5 +1,6 @@
-package com.boardingpass.be.domain.bag;
+package com.boardingpass.be.domain.bag.repository;
 
+import com.boardingpass.be.domain.bag.entity.ShoppingBagItem;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

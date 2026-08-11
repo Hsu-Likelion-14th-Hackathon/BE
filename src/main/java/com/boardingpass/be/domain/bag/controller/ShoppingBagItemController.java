@@ -1,9 +1,10 @@
-package com.boardingpass.be.domain.bag;
+package com.boardingpass.be.domain.bag.controller;
 
 import com.boardingpass.be.domain.bag.dto.ShoppingBagCreateRequest;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagDeleteResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagItemResponse;
 import com.boardingpass.be.domain.bag.dto.ShoppingBagListResponse;
+import com.boardingpass.be.domain.bag.service.ShoppingBagItemService;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

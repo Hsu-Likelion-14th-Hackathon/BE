@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.wishlist;
+package com.boardingpass.be.domain.wishlist.entity;
 
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.user.User;

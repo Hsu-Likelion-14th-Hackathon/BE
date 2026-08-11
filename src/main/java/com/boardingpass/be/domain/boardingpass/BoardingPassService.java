@@ -1,7 +1,7 @@
 package com.boardingpass.be.domain.boardingpass;
 
-import com.boardingpass.be.domain.bag.ShoppingBagItem;
-import com.boardingpass.be.domain.bag.ShoppingBagItemRepository;
+import com.boardingpass.be.domain.bag.entity.ShoppingBagItem;
+import com.boardingpass.be.domain.bag.repository.ShoppingBagItemRepository;
 import com.boardingpass.be.domain.boardingpass.dto.BoardingPassIssueRequest;
 import com.boardingpass.be.domain.boardingpass.dto.BoardingPassIssueResponse;
 import com.boardingpass.be.domain.boardingpass.dto.SurveyAnswerRequest;
@@ -21,8 +21,8 @@ import com.boardingpass.be.domain.survey.SurveyQuestion;
 import com.boardingpass.be.domain.survey.SurveyQuestionRepository;
 import com.boardingpass.be.domain.user.User;
 import com.boardingpass.be.domain.user.repository.UserRepository;
-import com.boardingpass.be.domain.wishlist.Wishlist;
-import com.boardingpass.be.domain.wishlist.WishlistRepository;
+import com.boardingpass.be.domain.wishlist.entity.Wishlist;
+import com.boardingpass.be.domain.wishlist.repository.WishlistRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
 import com.boardingpass.be.global.security.SecurityUtils;

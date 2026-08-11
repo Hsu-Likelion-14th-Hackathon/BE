@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.bag;
+package com.boardingpass.be.domain.bag.entity;
 
 import com.boardingpass.be.domain.product.ProductSize;
 import com.boardingpass.be.domain.user.User;

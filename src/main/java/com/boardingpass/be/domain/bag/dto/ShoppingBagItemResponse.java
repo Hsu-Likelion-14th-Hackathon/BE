@@ -1,6 +1,6 @@
 package com.boardingpass.be.domain.bag.dto;
 
-import com.boardingpass.be.domain.bag.ShoppingBagItem;
+import com.boardingpass.be.domain.bag.entity.ShoppingBagItem;
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.product.ProductImage;
 import com.boardingpass.be.domain.product.ProductSize;

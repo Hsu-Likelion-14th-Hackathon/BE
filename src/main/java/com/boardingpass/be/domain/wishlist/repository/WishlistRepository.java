@@ -1,5 +1,6 @@
-package com.boardingpass.be.domain.wishlist;
+package com.boardingpass.be.domain.wishlist.repository;
 
+import com.boardingpass.be.domain.wishlist.entity.Wishlist;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

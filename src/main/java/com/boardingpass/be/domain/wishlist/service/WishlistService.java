@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.wishlist;
+package com.boardingpass.be.domain.wishlist.service;
 
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.product.ProductColorRepository;
@@ -8,6 +8,8 @@ import com.boardingpass.be.domain.wishlist.dto.WishlistCreateRequest;
 import com.boardingpass.be.domain.wishlist.dto.WishlistDeleteResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistItemResponse;
 import com.boardingpass.be.domain.wishlist.dto.WishlistListResponse;
+import com.boardingpass.be.domain.wishlist.entity.Wishlist;
+import com.boardingpass.be.domain.wishlist.repository.WishlistRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
 import com.boardingpass.be.global.security.SecurityUtils;

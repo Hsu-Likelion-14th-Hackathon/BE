@@ -2,7 +2,7 @@ package com.boardingpass.be.domain.wishlist.dto;
 
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.product.ProductImage;
-import com.boardingpass.be.domain.wishlist.Wishlist;
+import com.boardingpass.be.domain.wishlist.entity.Wishlist;
 import java.util.Comparator;
 
 public record WishlistItemResponse(
