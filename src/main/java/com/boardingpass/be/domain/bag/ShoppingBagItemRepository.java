@@ -1,6 +1,7 @@
 package com.boardingpass.be.domain.bag;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +17,7 @@ public interface ShoppingBagItemRepository extends JpaRepository<ShoppingBagItem
       """)
   List<ShoppingBagItem> findByUserIdWithProduct(@Param("userId") Long userId);
 
-  boolean existsByUserIdAndProductSizeId(Long userId, Long productSizeId);
+  Optional<ShoppingBagItem> findByUserIdAndProductSizeId(Long userId, Long productSizeId);
 
   void deleteByIdAndUserId(Long id, Long userId);
 }
