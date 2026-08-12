@@ -1,5 +1,7 @@
 package com.boardingpass.be.domain.user.service;
 
+import com.boardingpass.be.domain.passport.Passport;
+import com.boardingpass.be.domain.passport.PassportRepository;
 import com.boardingpass.be.domain.user.NationalityValidator;
 import com.boardingpass.be.domain.user.User;
 import com.boardingpass.be.domain.user.dto.UserMeResponse;
@@ -18,11 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final PassportRepository passportRepository;
 
   @Transactional(readOnly = true)
   public UserMeResponse getMe() {
     User user = findCurrentUser();
-    return UserMeResponse.from(user);
+    String passportNo = passportRepository.findByUserId(user.getId())
+        .map(Passport::getPassportNo)
+        .orElse(null);
+    return UserMeResponse.of(user, passportNo);
   }
 
   @Transactional
