@@ -41,6 +41,9 @@ public enum ErrorStatus implements BaseErrorCode {
   DUPLICATE_CREDIT_TRANSACTION(HttpStatus.BAD_REQUEST, "DUPLICATE_CREDIT_TRANSACTION", "이미 처리된 크레딧 거래입니다."),
   FITTING_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "FITTING_SESSION_NOT_FOUND", "존재하지 않는 피팅 세션입니다."),
 
+  VISIT_LOG_NOT_FOUND(HttpStatus.NOT_FOUND, "VISIT_LOG_NOT_FOUND", "존재하지 않는 방문 기록입니다."),
+  FORBIDDEN_VISIT_LOG(HttpStatus.FORBIDDEN, "FORBIDDEN_VISIT_LOG", "본인의 방문 기록이 아닙니다."),
+
   KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
   PROFILE_ALREADY_REGISTERED(HttpStatus.CONFLICT, "PROFILE_ALREADY_REGISTERED", "이미 추가 정보가 등록된 회원입니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
