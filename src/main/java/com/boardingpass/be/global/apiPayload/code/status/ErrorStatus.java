@@ -30,6 +30,9 @@ public enum ErrorStatus implements BaseErrorCode {
   PRODUCT_SIZE_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_SIZE_NOT_FOUND", "존재하지 않는 상품 사이즈입니다."),
   STOCK_EXCEEDED(HttpStatus.BAD_REQUEST, "STOCK_EXCEEDED", "재고가 부족합니다."),
 
+  INSUFFICIENT_CREDIT(HttpStatus.BAD_REQUEST, "INSUFFICIENT_CREDIT", "크레딧이 부족합니다."),
+  FITTING_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "FITTING_SESSION_NOT_FOUND", "존재하지 않는 피팅 세션입니다."),
+
   KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
   PROFILE_ALREADY_REGISTERED(HttpStatus.CONFLICT, "PROFILE_ALREADY_REGISTERED", "이미 추가 정보가 등록된 회원입니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
