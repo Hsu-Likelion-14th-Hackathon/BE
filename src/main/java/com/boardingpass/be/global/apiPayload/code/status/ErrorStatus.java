@@ -22,6 +22,12 @@ public enum ErrorStatus implements BaseErrorCode {
   STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장 정보를 찾을 수 없습니다."),
   FLOOR_NOT_FOUND(HttpStatus.NOT_FOUND, "FLOOR_NOT_FOUND", "존재하지 않는 층입니다."),
 
+  BOARDING_PASS_NOT_FOUND(HttpStatus.NOT_FOUND, "BOARDING_PASS_NOT_FOUND", "발급받은 Boarding Pass가 없습니다."),
+  FORBIDDEN_BOARDING_PASS(HttpStatus.FORBIDDEN, "FORBIDDEN_BOARDING_PASS", "해당 Boarding Pass에 접근할 수 없습니다."),
+  ALREADY_SCANNED(HttpStatus.BAD_REQUEST, "ALREADY_SCANNED", "이미 스캔된 Boarding Pass입니다."),
+  ROUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "ROUTE_NOT_FOUND", "추천 동선이 아직 생성되지 않았습니다."),
+  NOT_SCANNED_YET(HttpStatus.BAD_REQUEST, "NOT_SCANNED_YET", "스캔되지 않은 Boarding Pass입니다."),
+
   SURVEY_INCOMPLETE(HttpStatus.BAD_REQUEST, "SURVEY_INCOMPLETE", "필수 설문 문항에 모두 응답해야 합니다."),
   INVALID_SURVEY_ANSWER(HttpStatus.BAD_REQUEST, "INVALID_SURVEY_ANSWER", "설문 응답이 올바르지 않습니다."),
 
