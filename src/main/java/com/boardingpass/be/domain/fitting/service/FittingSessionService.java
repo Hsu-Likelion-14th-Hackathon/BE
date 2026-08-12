@@ -1,9 +1,9 @@
 package com.boardingpass.be.domain.fitting.service;
 
-import com.boardingpass.be.domain.credit.CreditLedger;
-import com.boardingpass.be.domain.credit.CreditLedgerRepository;
+import com.boardingpass.be.domain.credit.CreditPolicy;
 import com.boardingpass.be.domain.credit.CreditReason;
 import com.boardingpass.be.domain.credit.CreditRefType;
+import com.boardingpass.be.domain.credit.CreditService;
 import com.boardingpass.be.domain.fitting.FittingStatus;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionCreateRequest;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionResponse;
@@ -12,8 +12,6 @@ import com.boardingpass.be.domain.fitting.generator.FittingGenerationCommand;
 import com.boardingpass.be.domain.fitting.generator.FittingGenerationResult;
 import com.boardingpass.be.domain.fitting.generator.FittingImageGenerator;
 import com.boardingpass.be.domain.fitting.repository.FittingSessionRepository;
-import com.boardingpass.be.domain.passport.Passport;
-import com.boardingpass.be.domain.passport.PassportRepository;
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.product.ProductColorRepository;
 import com.boardingpass.be.domain.storage.AzureBlobStorageService;
@@ -31,29 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class FittingSessionService {
 
-  private static final int FITTING_CREDIT_COST = 100;
-
   private final FittingSessionRepository fittingSessionRepository;
   private final UserRepository userRepository;
-  private final PassportRepository passportRepository;
-  private final CreditLedgerRepository creditLedgerRepository;
   private final ProductColorRepository productColorRepository;
   private final AzureBlobStorageService azureBlobStorageService;
   private final FittingImageGenerator fittingImageGenerator;
+  private final CreditService creditService;
 
   @Transactional
   public FittingSessionResponse createFittingSession(FittingSessionCreateRequest request) {
     Long userId = SecurityUtils.getCurrentUserId();
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-    Passport passport = passportRepository.findByUserId(userId)
-        .orElseThrow(() -> new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR));
     ProductColor productColor = productColorRepository.findById(request.productColorId())
         .orElseThrow(() -> new GeneralException(ErrorStatus.PRODUCT_COLOR_NOT_FOUND));
-
-    if (!passport.canAfford(FITTING_CREDIT_COST)) {
-      throw new GeneralException(ErrorStatus.INSUFFICIENT_CREDIT);
-    }
 
     String sourceImageUrl = resolveSourceImageUrl(request.fileKey(), user);
 
@@ -62,21 +51,18 @@ public class FittingSessionService {
             .user(user)
             .productColor(productColor)
             .sourceImageUrl(sourceImageUrl)
-            .creditCost(FITTING_CREDIT_COST)
+            .creditCost(CreditPolicy.FITTING_COST)
             .status(FittingStatus.PENDING)
             .build()
     );
 
-    passport.applyCredit(-FITTING_CREDIT_COST);
-    creditLedgerRepository.save(
-        CreditLedger.builder()
-            .user(user)
-            .amount(-FITTING_CREDIT_COST)
-            .reason(CreditReason.FITTING)
-            .refType(CreditRefType.FITTING_SESSION)
-            .refId(session.getId())
-            .balanceAfter(passport.getCreditBalance())
-            .build()
+    creditService.spend(
+        userId,
+        CreditPolicy.FITTING_COST,
+        CreditReason.FITTING,
+        CreditRefType.FITTING_SESSION,
+        session.getId(),
+        "가상 피팅"
     );
 
     return FittingSessionResponse.from(session);
@@ -122,19 +108,13 @@ public class FittingSessionService {
   }
 
   private void refundCredit(FittingSession session) {
-    Passport passport = passportRepository.findByUserId(session.getUser().getId())
-        .orElseThrow(() -> new GeneralException(ErrorStatus._INTERNAL_SERVER_ERROR));
-    passport.applyCredit(session.getCreditCost());
-
-    creditLedgerRepository.save(
-        CreditLedger.builder()
-            .user(session.getUser())
-            .amount(session.getCreditCost())
-            .reason(CreditReason.REFUND)
-            .refType(CreditRefType.FITTING_SESSION)
-            .refId(session.getId())
-            .balanceAfter(passport.getCreditBalance())
-            .build()
+    creditService.earn(
+        session.getUser().getId(),
+        session.getCreditCost(),
+        CreditReason.REFUND,
+        CreditRefType.FITTING_SESSION,
+        session.getId(),
+        "가상 피팅 실패 환급"
     );
   }
 }
