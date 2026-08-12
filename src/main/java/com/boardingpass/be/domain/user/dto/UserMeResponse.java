@@ -11,10 +11,9 @@ public record UserMeResponse(
     Provider provider,
     String nationality,
     LocalDate birthDate,
-    String defaultBodyImageUrl,
-    String passportNo
+    String defaultBodyImageUrl
 ) {
-  public static UserMeResponse of(User user, String passportNo) {
+  public static UserMeResponse from(User user) {
     return new UserMeResponse(
         user.getId(),
         user.getName(),
@@ -22,8 +21,7 @@ public record UserMeResponse(
         user.getProvider(),
         user.getNationality(),
         user.getBirthDate(),
-        user.getDefaultBodyImageUrl(),
-        passportNo
+        user.getDefaultBodyImageUrl()
     );
   }
 }
