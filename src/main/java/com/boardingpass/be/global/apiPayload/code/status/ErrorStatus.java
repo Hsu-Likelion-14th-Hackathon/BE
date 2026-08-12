@@ -31,6 +31,8 @@ public enum ErrorStatus implements BaseErrorCode {
   STOCK_EXCEEDED(HttpStatus.BAD_REQUEST, "STOCK_EXCEEDED", "재고가 부족합니다."),
 
   INSUFFICIENT_CREDIT(HttpStatus.BAD_REQUEST, "INSUFFICIENT_CREDIT", "크레딧이 부족합니다."),
+  PASSPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "PASSPORT_NOT_FOUND", "발급된 여권이 없습니다."),
+  DUPLICATE_CREDIT_TRANSACTION(HttpStatus.BAD_REQUEST, "DUPLICATE_CREDIT_TRANSACTION", "이미 처리된 크레딧 거래입니다."),
   FITTING_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "FITTING_SESSION_NOT_FOUND", "존재하지 않는 피팅 세션입니다."),
 
   KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
