@@ -84,7 +84,9 @@ public class FittingSessionService {
 
   private String resolveSourceImageUrl(String fileKey, User user) {
     if (fileKey != null && !fileKey.isBlank()) {
-      return azureBlobStorageService.createReadUrl(fileKey);
+      String imageUrl = azureBlobStorageService.createReadUrl(fileKey);
+      user.updateDefaultBodyImage(imageUrl);
+      return imageUrl;
     }
     if (!user.hasDefaultBodyImage()) {
       throw new GeneralException(ErrorStatus.BODY_IMAGE_NOT_FOUND);
