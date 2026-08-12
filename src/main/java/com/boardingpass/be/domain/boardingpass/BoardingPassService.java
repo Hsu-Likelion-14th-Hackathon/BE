@@ -37,6 +37,22 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.boardingpass.be.domain.boardingpass.dto.BoardingPassCompleteResponse;
+import com.boardingpass.be.domain.boardingpass.dto.BoardingPassRouteResponse;
+import com.boardingpass.be.domain.boardingpass.dto.BoardingPassScanRequest;
+import com.boardingpass.be.domain.boardingpass.dto.BoardingPassScanResponse;
+import com.boardingpass.be.domain.boardingpass.dto.BoardingPassSummaryResponse;
+import com.boardingpass.be.domain.credit.CreditPolicy;
+import com.boardingpass.be.domain.credit.CreditReason;
+import com.boardingpass.be.domain.credit.CreditRefType;
+import com.boardingpass.be.domain.credit.CreditService;
+import com.boardingpass.be.domain.passport.Passport;
+import com.boardingpass.be.domain.passport.PassportRepository;
+import com.boardingpass.be.domain.passport.PassportStamp;
+import com.boardingpass.be.domain.passport.PassportStampRepository;
+import com.boardingpass.be.domain.store.VisitLog;
+import com.boardingpass.be.domain.store.VisitLogRepository;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -61,14 +77,18 @@ public class BoardingPassService {
   private final RouteRecommender routeRecommender;
   private final SecureRandom secureRandom = new SecureRandom();
 
+  private final VisitLogRepository visitLogRepository;
+  private final PassportRepository passportRepository;
+  private final PassportStampRepository passportStampRepository;
+  private final CreditService creditService;
+
   @Transactional
   public BoardingPassIssueResponse issue(BoardingPassIssueRequest request) {
     Long userId = SecurityUtils.getCurrentUserId();
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new GeneralException(ErrorStatus._UNAUTHORIZED));
 
-    List<SurveyQuestion> activeQuestions =
-        surveyQuestionRepository.findByIsActiveTrueOrderByStepNoAsc();
+    List<SurveyQuestion> activeQuestions = surveyQuestionRepository.findByIsActiveTrueOrderByStepNoAsc();
     ValidatedSurvey validated = validateAnswers(activeQuestions, request.answers());
 
     BoardingPass boardingPass = boardingPassRepository.saveAndFlush(
@@ -77,8 +97,7 @@ public class BoardingPassService {
             .passCode(generateUniquePassCode())
             .status(BoardingPassStatus.ISSUED)
             .dataConsent(Boolean.TRUE.equals(request.dataConsent()))
-            .build()
-    );
+            .build());
 
     saveSurveys(boardingPass, validated);
     List<BoardingPassItem> items = createItems(boardingPass, user, boardingPass.getDataConsent());
@@ -96,18 +115,117 @@ public class BoardingPassService {
             validated.q4Option(),
             validated.q5Option(),
             validated.textAnswer(),
-            productNames
-        )
-    );
+            productNames));
     saveRouteSteps(boardingPass, steps);
 
     return BoardingPassIssueResponse.of(boardingPass, items);
   }
 
+  @Transactional(readOnly = true)
+  public BoardingPassSummaryResponse getLatest() {
+    Long userId = SecurityUtils.getCurrentUserId();
+    BoardingPass pass = boardingPassRepository.findTopByUserIdOrderByCreatedAtDesc(userId)
+        .orElseThrow(() -> new GeneralException(ErrorStatus.BOARDING_PASS_NOT_FOUND));
+    return BoardingPassSummaryResponse.from(pass);
+  }
+
+  @Transactional
+  public BoardingPassScanResponse scan(Long boardingPassId, BoardingPassScanRequest request) {
+    Long userId = SecurityUtils.getCurrentUserId();
+    BoardingPass pass = getOwnedBoardingPass(boardingPassId, userId);
+
+    if (!pass.isIssued()) {
+      throw new GeneralException(ErrorStatus.ALREADY_SCANNED);
+    }
+
+    Store store = resolveStore(request == null ? null : request.storeId());
+    long visitCount = visitLogRepository.countByStoreId(store.getId());
+    String entryNo = String.format("%05d", visitCount + 1);
+
+    VisitLog visitLog = visitLogRepository.saveAndFlush(
+        VisitLog.builder()
+            .user(pass.getUser())
+            .store(store)
+            .boardingPass(pass)
+            .entryNo(entryNo)
+            .scannedAt(LocalDateTime.now())
+            .build());
+
+    pass.markScanned();
+
+    int creditBalance = creditService.earn(
+        userId,
+        CreditPolicy.SCAN_AMOUNT,
+        CreditReason.SCAN,
+        CreditRefType.VISIT_LOG,
+        visitLog.getId(),
+        "MCM HAUS 방문");
+
+    return BoardingPassScanResponse.of(
+        pass, visitLog, CreditPolicy.SCAN_AMOUNT, creditBalance);
+  }
+
+  @Transactional(readOnly = true)
+  public BoardingPassRouteResponse getRoute(Long boardingPassId) {
+    Long userId = SecurityUtils.getCurrentUserId();
+    getOwnedBoardingPass(boardingPassId, userId);
+
+    List<RouteStep> steps = routeStepRepository.findByBoardingPassIdOrderBySequenceAsc(boardingPassId);
+    if (steps.isEmpty()) {
+      throw new GeneralException(ErrorStatus.ROUTE_NOT_FOUND);
+    }
+    return BoardingPassRouteResponse.of(boardingPassId, steps);
+  }
+
+  @Transactional
+  public BoardingPassCompleteResponse complete(Long boardingPassId) {
+    Long userId = SecurityUtils.getCurrentUserId();
+    BoardingPass pass = getOwnedBoardingPass(boardingPassId, userId);
+
+    if (!pass.isScanned()) {
+      throw new GeneralException(ErrorStatus.NOT_SCANNED_YET);
+    }
+
+    VisitLog visitLog = visitLogRepository.findByBoardingPassId(boardingPassId)
+        .orElseThrow(() -> new GeneralException(ErrorStatus.NOT_SCANNED_YET));
+
+    visitLog.finish(LocalDateTime.now());
+    pass.markCompleted();
+
+    Passport passport = passportRepository.findByUserId(userId)
+        .orElseThrow(() -> new GeneralException(ErrorStatus.PASSPORT_NOT_FOUND));
+    passport.increaseVisitCount();
+
+    PassportStamp stamp = passportStampRepository.save(
+        PassportStamp.builder()
+            .passport(passport)
+            .visitLog(visitLog)
+            .build());
+
+    return BoardingPassCompleteResponse.of(pass, visitLog, stamp, passport);
+  }
+
+  private BoardingPass getOwnedBoardingPass(Long boardingPassId, Long userId) {
+    BoardingPass pass = boardingPassRepository.findById(boardingPassId)
+        .orElseThrow(() -> new GeneralException(ErrorStatus.BOARDING_PASS_NOT_FOUND));
+    if (!pass.getUser().getId().equals(userId)) {
+      throw new GeneralException(ErrorStatus.FORBIDDEN_BOARDING_PASS);
+    }
+    return pass;
+  }
+
+  private Store resolveStore(Long storeId) {
+    if (storeId == null) {
+      return storeRepository.findFirstByOrderByIdAsc()
+          .orElseThrow(() -> new GeneralException(ErrorStatus.STORE_NOT_FOUND));
+    }
+    return storeRepository.findById(storeId)
+        .orElseThrow(() -> new GeneralException(ErrorStatus.STORE_NOT_FOUND));
+  }
+
   private ValidatedSurvey validateAnswers(
       List<SurveyQuestion> activeQuestions,
-      List<SurveyAnswerRequest> answers
-  ) {
+      List<SurveyAnswerRequest> answers) {
     if (answers == null) {
       throw new GeneralException(ErrorStatus.SURVEY_INCOMPLETE);
     }
@@ -169,15 +287,13 @@ public class BoardingPassService {
         answerByQuestionId,
         selectedOptionByQuestionId,
         textAnswer,
-        q2, q3, q4, q5
-    );
+        q2, q3, q4, q5);
   }
 
   private SurveyOption requiredOptionByStep(
       List<SurveyQuestion> questions,
       Map<Long, SurveyOption> selected,
-      int stepNo
-  ) {
+      int stepNo) {
     SurveyQuestion question = questions.stream()
         .filter(q -> q.getStepNo() == stepNo)
         .findFirst()
@@ -202,16 +318,14 @@ public class BoardingPassService {
               .surveyOption(validated.selectedOptionByQuestionId().get(question.getId()))
               .textAnswer(
                   question.getQuestionType() == QuestionType.TEXT ? validated.textAnswer() : null)
-              .build()
-      );
+              .build());
     }
   }
 
   private List<BoardingPassItem> createItems(
       BoardingPass boardingPass,
       User user,
-      boolean dataConsent
-  ) {
+      boolean dataConsent) {
     LinkedHashMap<Long, ItemSource> colorSource = new LinkedHashMap<>();
 
     if (dataConsent) {
@@ -247,8 +361,7 @@ public class BoardingPassService {
                 .boardingPass(boardingPass)
                 .productColor(color)
                 .source(entry.getValue())
-                .build()
-        ));
+                .build()));
       }
     }
 
@@ -271,8 +384,7 @@ public class BoardingPassService {
                 .boardingPass(boardingPass)
                 .productColor(defaultColor)
                 .source(ItemSource.SURVEY)
-                .build()
-        ));
+                .build()));
         count++;
       }
     }
@@ -294,8 +406,7 @@ public class BoardingPassService {
               .sequence(step.sequence())
               .reason(step.reason())
               .isRecommended(step.recommended())
-              .build()
-      );
+              .build());
     }
   }
 
@@ -325,7 +436,6 @@ public class BoardingPassService {
       SurveyOption q2Option,
       SurveyOption q3Option,
       SurveyOption q4Option,
-      SurveyOption q5Option
-  ) {
+      SurveyOption q5Option) {
   }
 }
