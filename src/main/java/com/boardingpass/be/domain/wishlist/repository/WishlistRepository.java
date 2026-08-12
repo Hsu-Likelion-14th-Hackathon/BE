@@ -1,5 +1,6 @@
-package com.boardingpass.be.domain.wishlist;
+package com.boardingpass.be.domain.wishlist.repository;
 
+import com.boardingpass.be.domain.wishlist.entity.Wishlist;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +15,8 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
       where w.user.id = :userId
       """)
   List<Wishlist> findByUserIdWithProduct(@Param("userId") Long userId);
+
+  boolean existsByUserIdAndProductColorId(Long userId, Long productColorId);
+
+  void deleteByUserIdAndProductColorId(Long userId, Long productColorId);
 }
