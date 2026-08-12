@@ -1,7 +1,8 @@
-package com.boardingpass.be.domain.fitting;
+package com.boardingpass.be.domain.fitting.controller;
 
 import com.boardingpass.be.domain.fitting.dto.FittingSessionCreateRequest;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionResponse;
+import com.boardingpass.be.domain.fitting.service.FittingSessionService;
 import com.boardingpass.be.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

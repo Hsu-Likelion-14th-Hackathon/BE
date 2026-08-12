@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.fitting;
+package com.boardingpass.be.domain.fitting.entity;
 
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.user.User;

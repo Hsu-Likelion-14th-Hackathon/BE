@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.fitting;
+package com.boardingpass.be.domain.fitting.service;
 
 import com.boardingpass.be.domain.credit.CreditLedger;
 import com.boardingpass.be.domain.credit.CreditLedgerRepository;
@@ -6,9 +6,12 @@ import com.boardingpass.be.domain.credit.CreditReason;
 import com.boardingpass.be.domain.credit.CreditRefType;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionCreateRequest;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionResponse;
+import com.boardingpass.be.domain.fitting.entity.FittingSession;
+import com.boardingpass.be.domain.fitting.entity.FittingStatus;
 import com.boardingpass.be.domain.fitting.generator.FittingGenerationCommand;
 import com.boardingpass.be.domain.fitting.generator.FittingGenerationResult;
 import com.boardingpass.be.domain.fitting.generator.FittingImageGenerator;
+import com.boardingpass.be.domain.fitting.repository.FittingSessionRepository;
 import com.boardingpass.be.domain.passport.Passport;
 import com.boardingpass.be.domain.passport.PassportRepository;
 import com.boardingpass.be.domain.product.ProductColor;

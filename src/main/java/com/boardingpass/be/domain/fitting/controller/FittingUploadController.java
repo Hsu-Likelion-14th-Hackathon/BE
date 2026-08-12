@@ -1,4 +1,4 @@
-package com.boardingpass.be.domain.fitting;
+package com.boardingpass.be.domain.fitting.controller;
 
 import com.boardingpass.be.domain.fitting.dto.UploadUrlRequest;
 import com.boardingpass.be.domain.fitting.dto.UploadUrlResponse;
