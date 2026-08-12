@@ -1,7 +1,7 @@
 package com.boardingpass.be.domain.fitting.dto;
 
+import com.boardingpass.be.domain.fitting.FittingStatus;
 import com.boardingpass.be.domain.fitting.entity.FittingSession;
-import com.boardingpass.be.domain.fitting.entity.FittingStatus;
 
 public record FittingSessionResponse(
     Long fittingSessionId,

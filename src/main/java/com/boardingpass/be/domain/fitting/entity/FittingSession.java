@@ -1,5 +1,6 @@
 package com.boardingpass.be.domain.fitting.entity;
 
+import com.boardingpass.be.domain.fitting.FittingStatus;
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.user.User;
 import com.boardingpass.be.global.common.BaseEntity;
