@@ -6,6 +6,8 @@ import com.boardingpass.be.domain.auth.dto.ProfileRequest;
 import com.boardingpass.be.domain.auth.dto.ProfileResponse;
 import com.boardingpass.be.domain.auth.kakao.KakaoAuthClient;
 import com.boardingpass.be.domain.auth.kakao.KakaoUserInfo;
+import com.boardingpass.be.domain.passport.Passport;
+import com.boardingpass.be.domain.passport.PassportRepository;
 import com.boardingpass.be.domain.user.NationalityValidator;
 import com.boardingpass.be.domain.user.Provider;
 import com.boardingpass.be.domain.user.User;
@@ -22,7 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
+  private static final int PASSPORT_NO_LENGTH = 4;
+
   private final UserRepository userRepository;
+  private final PassportRepository passportRepository;
   private final KakaoAuthClient kakaoAuthClient;
   private final JwtProvider jwtProvider;
 
@@ -61,6 +66,23 @@ public class AuthService {
     NationalityValidator.validate(request.nationality());
     user.completeProfile(request.name(), request.birthDate(), request.nationality());
 
-    return ProfileResponse.from(user);
+    Passport passport = issuePassport(user);
+
+    return ProfileResponse.of(user, passport);
+  }
+
+  private Passport issuePassport(User user) {
+    Passport passport = passportRepository.save(
+        Passport.builder()
+            .user(user)
+            .passportNo("0")
+            .build()
+    );
+    passport.assignPassportNo(formatPassportNo(passport.getId()));
+    return passport;
+  }
+
+  private String formatPassportNo(Long passportId) {
+    return String.format("%0" + PASSPORT_NO_LENGTH + "d", passportId);
   }
 }

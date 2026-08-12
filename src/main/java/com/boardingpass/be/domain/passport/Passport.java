@@ -51,6 +51,10 @@ public class Passport extends BaseEntity {
   @Column(name = "total_visit_count", nullable = false)
   private Integer totalVisitCount = 0;
 
+  public void assignPassportNo(String passportNo) {
+    this.passportNo = passportNo;
+  }
+
   public void applyCredit(int amount) {
     this.creditBalance += amount;
   }
