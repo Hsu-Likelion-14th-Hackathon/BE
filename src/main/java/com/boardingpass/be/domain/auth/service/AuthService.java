@@ -19,6 +19,9 @@ import com.boardingpass.be.global.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.boardingpass.be.domain.credit.CreditService;
+import com.boardingpass.be.domain.credit.CreditPolicy;
+import com.boardingpass.be.domain.credit.CreditReason;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +33,8 @@ public class AuthService {
   private final PassportRepository passportRepository;
   private final KakaoAuthClient kakaoAuthClient;
   private final JwtProvider jwtProvider;
-
+  private final CreditService creditService;
+  
   @Transactional
   public KakaoLoginResponse loginWithKakao(KakaoLoginRequest request) {
     KakaoUserInfo kakaoUserInfo = kakaoAuthClient.authenticate(request.code(), request.redirectUri());
@@ -45,8 +49,7 @@ public class AuthService {
               .provider(Provider.KAKAO)
               .providerUid(kakaoUserInfo.providerUid())
               .email(kakaoUserInfo.email())
-              .build()
-      );
+              .build());
     }
 
     String accessToken = jwtProvider.generateAccessToken(user.getId());
@@ -68,6 +71,14 @@ public class AuthService {
 
     Passport passport = issuePassport(user);
 
+    creditService.earn(
+        user.getId(),
+        CreditPolicy.SIGNUP_AMOUNT,
+        CreditReason.SIGNUP,
+        null,
+        null,
+        "가입 축하 크레딧");
+
     return ProfileResponse.of(user, passport);
   }
 
@@ -76,8 +87,7 @@ public class AuthService {
         Passport.builder()
             .user(user)
             .passportNo("0")
-            .build()
-    );
+            .build());
     passport.assignPassportNo(formatPassportNo(passport.getId()));
     return passport;
   }
