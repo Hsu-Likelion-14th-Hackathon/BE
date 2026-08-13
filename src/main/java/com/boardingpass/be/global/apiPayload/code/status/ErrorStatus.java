@@ -45,6 +45,8 @@ public enum ErrorStatus implements BaseErrorCode {
   FORBIDDEN_VISIT_LOG(HttpStatus.FORBIDDEN, "FORBIDDEN_VISIT_LOG", "본인의 방문 기록이 아닙니다."),
 
   KAKAO_AUTH_FAILED(HttpStatus.UNAUTHORIZED, "KAKAO_AUTH_FAILED", "카카오 인증에 실패했습니다."),
+  EMAIL_ALREADY_REGISTERED(HttpStatus.CONFLICT, "EMAIL_ALREADY_REGISTERED", "이미 가입된 이메일입니다."),
+  INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "이메일 또는 비밀번호가 일치하지 않습니다."),
   PROFILE_ALREADY_REGISTERED(HttpStatus.CONFLICT, "PROFILE_ALREADY_REGISTERED", "이미 추가 정보가 등록된 회원입니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
   INVALID_NATIONALITY(HttpStatus.BAD_REQUEST, "INVALID_NATIONALITY", "국적은 ISO 3166-1 alpha-2 형식의 2자리 코드여야 합니다."),

@@ -22,9 +22,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(
     name = "users",
-    uniqueConstraints = @UniqueConstraint(
-        name = "uk_users_provider",
-        columnNames = {"provider", "provider_uid"}))
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_users_provider", columnNames = {"provider", "provider_uid"}),
+        @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+    })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
@@ -46,6 +47,9 @@ public class User extends BaseEntity {
 
   @Column(name = "email", length = 255)
   private String email;
+
+  @Column(name = "password", length = 255)
+  private String password;
 
   @Column(name = "nationality", length = 50)
   private String nationality;
