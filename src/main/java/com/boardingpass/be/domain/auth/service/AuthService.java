@@ -52,7 +52,7 @@ public class AuthService {
     boolean isNewUser = user == null;
     if (isNewUser) {
       if (kakaoUserInfo.email() != null && userRepository.findByEmail(kakaoUserInfo.email()).isPresent()) {
-        throw new GeneralException(ErrorStatus.EMAIL_ALREADY_REGISTERED);
+        throw new GeneralException(ErrorStatus.EMAIL_ALREADY_REGISTERED_LOCAL);
       }
       user = userRepository.save(
           User.builder()
@@ -68,9 +68,12 @@ public class AuthService {
 
   @Transactional
   public SignupResponse signup(SignupRequest request) {
-    if (userRepository.findByEmail(request.email()).isPresent()) {
-      throw new GeneralException(ErrorStatus.EMAIL_ALREADY_REGISTERED);
-    }
+    userRepository.findByEmail(request.email()).ifPresent(existing -> {
+      throw new GeneralException(
+          existing.getProvider() == Provider.KAKAO
+              ? ErrorStatus.EMAIL_ALREADY_REGISTERED_KAKAO
+              : ErrorStatus.EMAIL_ALREADY_REGISTERED_LOCAL);
+    });
 
     User user = userRepository.save(
         User.builder()
