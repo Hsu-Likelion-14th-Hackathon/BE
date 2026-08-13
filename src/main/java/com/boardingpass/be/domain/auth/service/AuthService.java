@@ -15,6 +15,7 @@ import com.boardingpass.be.domain.credit.CreditReason;
 import com.boardingpass.be.domain.credit.CreditService;
 import com.boardingpass.be.domain.passport.Passport;
 import com.boardingpass.be.domain.passport.PassportRepository;
+import com.boardingpass.be.domain.user.NameValidator;
 import com.boardingpass.be.domain.user.NationalityValidator;
 import com.boardingpass.be.domain.user.Provider;
 import com.boardingpass.be.domain.user.User;
@@ -106,6 +107,7 @@ public class AuthService {
       throw new GeneralException(ErrorStatus.PROFILE_ALREADY_REGISTERED);
     }
 
+    NameValidator.validate(request.name());
     NationalityValidator.validate(request.nationality());
     user.completeProfile(request.name(), request.birthDate(), request.nationality());
 
