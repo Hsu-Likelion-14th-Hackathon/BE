@@ -1,5 +1,6 @@
 package com.boardingpass.be.domain.user.service;
 
+import com.boardingpass.be.domain.user.NameValidator;
 import com.boardingpass.be.domain.user.NationalityValidator;
 import com.boardingpass.be.domain.user.User;
 import com.boardingpass.be.domain.user.dto.UserMeResponse;
@@ -29,6 +30,7 @@ public class UserService {
   public UserUpdateResponse updateMe(UserUpdateRequest request) {
     User user = findCurrentUser();
 
+    NameValidator.validate(request.name());
     NationalityValidator.validate(request.nationality());
     user.completeProfile(request.name(), request.birthDate(), request.nationality());
 
