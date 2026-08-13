@@ -47,6 +47,9 @@ public class ProductService {
       throw new GeneralException(ErrorStatus.PRODUCT_COLOR_NOT_FOUND);
     }
 
-    return ProductDetailResponse.from(product);
+    Long userId = SecurityUtils.getCurrentUserId();
+    Set<Long> wishedProductColorIds = wishlistRepository.findProductColorIdsByUserId(userId);
+
+    return ProductDetailResponse.from(product, wishedProductColorIds);
   }
 }
