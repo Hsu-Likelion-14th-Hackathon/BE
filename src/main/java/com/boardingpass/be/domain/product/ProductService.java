@@ -2,9 +2,12 @@ package com.boardingpass.be.domain.product;
 
 import com.boardingpass.be.domain.product.dto.ProductDetailResponse;
 import com.boardingpass.be.domain.product.dto.ProductSummaryResponse;
+import com.boardingpass.be.domain.wishlist.repository.WishlistRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
+import com.boardingpass.be.global.security.SecurityUtils;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
   private final ProductRepository productRepository;
+  private final WishlistRepository wishlistRepository;
 
   public List<ProductSummaryResponse> getProducts(String sort, String size) {
     ProductSortType sortType = ProductSortType.from(sort);
@@ -26,7 +30,13 @@ public class ProductService {
       case POPULARITY -> productRepository.findAllByPopularityRankAscAndSizeLabel(sizeLabel);
     };
 
-    return products.stream().map(ProductSummaryResponse::from).toList();
+    Long userId = SecurityUtils.getCurrentUserId();
+    Set<Long> wishedProductColorIds = wishlistRepository.findProductColorIdsByUserId(userId);
+
+    return products.stream()
+        .flatMap(product -> product.getColors().stream())
+        .map(color -> ProductSummaryResponse.from(color, wishedProductColorIds))
+        .toList();
   }
 
   public ProductDetailResponse getProductDetail(Long productId) {
