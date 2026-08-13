@@ -2,10 +2,17 @@ package com.boardingpass.be.domain.auth.service;
 
 import com.boardingpass.be.domain.auth.dto.KakaoLoginRequest;
 import com.boardingpass.be.domain.auth.dto.KakaoLoginResponse;
+import com.boardingpass.be.domain.auth.dto.LoginRequest;
+import com.boardingpass.be.domain.auth.dto.LoginResponse;
 import com.boardingpass.be.domain.auth.dto.ProfileRequest;
 import com.boardingpass.be.domain.auth.dto.ProfileResponse;
+import com.boardingpass.be.domain.auth.dto.SignupRequest;
+import com.boardingpass.be.domain.auth.dto.SignupResponse;
 import com.boardingpass.be.domain.auth.kakao.KakaoAuthClient;
 import com.boardingpass.be.domain.auth.kakao.KakaoUserInfo;
+import com.boardingpass.be.domain.credit.CreditPolicy;
+import com.boardingpass.be.domain.credit.CreditReason;
+import com.boardingpass.be.domain.credit.CreditService;
 import com.boardingpass.be.domain.passport.Passport;
 import com.boardingpass.be.domain.passport.PassportRepository;
 import com.boardingpass.be.domain.user.NationalityValidator;
@@ -17,11 +24,9 @@ import com.boardingpass.be.global.exception.GeneralException;
 import com.boardingpass.be.global.jwt.JwtProvider;
 import com.boardingpass.be.global.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.boardingpass.be.domain.credit.CreditService;
-import com.boardingpass.be.domain.credit.CreditPolicy;
-import com.boardingpass.be.domain.credit.CreditReason;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +39,8 @@ public class AuthService {
   private final KakaoAuthClient kakaoAuthClient;
   private final JwtProvider jwtProvider;
   private final CreditService creditService;
-  
+  private final PasswordEncoder passwordEncoder;
+
   @Transactional
   public KakaoLoginResponse loginWithKakao(KakaoLoginRequest request) {
     KakaoUserInfo kakaoUserInfo = kakaoAuthClient.authenticate(request.code(), request.redirectUri());
@@ -44,6 +50,9 @@ public class AuthService {
 
     boolean isNewUser = user == null;
     if (isNewUser) {
+      if (kakaoUserInfo.email() != null && userRepository.findByEmail(kakaoUserInfo.email()).isPresent()) {
+        throw new GeneralException(ErrorStatus.EMAIL_ALREADY_REGISTERED);
+      }
       user = userRepository.save(
           User.builder()
               .provider(Provider.KAKAO)
@@ -54,6 +63,37 @@ public class AuthService {
 
     String accessToken = jwtProvider.generateAccessToken(user.getId());
     return new KakaoLoginResponse(accessToken, isNewUser, user.getId());
+  }
+
+  @Transactional
+  public SignupResponse signup(SignupRequest request) {
+    if (userRepository.findByEmail(request.email()).isPresent()) {
+      throw new GeneralException(ErrorStatus.EMAIL_ALREADY_REGISTERED);
+    }
+
+    User user = userRepository.save(
+        User.builder()
+            .provider(Provider.LOCAL)
+            .providerUid(request.email())
+            .email(request.email())
+            .password(passwordEncoder.encode(request.password()))
+            .build());
+
+    String accessToken = jwtProvider.generateAccessToken(user.getId());
+    return new SignupResponse(accessToken, user.getId());
+  }
+
+  @Transactional(readOnly = true)
+  public LoginResponse login(LoginRequest request) {
+    User user = userRepository.findByProviderAndProviderUid(Provider.LOCAL, request.email())
+        .orElseThrow(() -> new GeneralException(ErrorStatus.INVALID_CREDENTIALS));
+
+    if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+      throw new GeneralException(ErrorStatus.INVALID_CREDENTIALS);
+    }
+
+    String accessToken = jwtProvider.generateAccessToken(user.getId());
+    return new LoginResponse(accessToken, user.getId());
   }
 
   @Transactional
