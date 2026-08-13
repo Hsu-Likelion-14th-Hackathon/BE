@@ -6,6 +6,7 @@ import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
+import java.io.ByteArrayInputStream;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -47,6 +48,20 @@ public class AzureBlobStorageService {
     } catch (Exception e) {
       throw new GeneralException(ErrorStatus.FILE_UPLOAD_FAILED);
     }
+  }
+
+  public String uploadGeneratedImage(byte[] imageBytes, String contentType) {
+    String extension = "image/png".equals(contentType) ? ".png" : ".jpg";
+    String fileKey = "fitting/results/" + UUID.randomUUID() + extension;
+
+    try {
+      BlobClient blobClient = container().getBlobClient(fileKey);
+      blobClient.upload(new ByteArrayInputStream(imageBytes), imageBytes.length, true);
+    } catch (Exception e) {
+      throw new GeneralException(ErrorStatus.FILE_UPLOAD_FAILED);
+    }
+
+    return createReadUrl(fileKey);
   }
 
   public String createReadUrl(String fileKey) {
