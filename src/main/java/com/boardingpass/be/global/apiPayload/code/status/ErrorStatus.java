@@ -51,7 +51,7 @@ public enum ErrorStatus implements BaseErrorCode {
   PROFILE_ALREADY_REGISTERED(HttpStatus.CONFLICT, "PROFILE_ALREADY_REGISTERED", "이미 추가 정보가 등록된 회원입니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "존재하지 않는 회원입니다."),
   INVALID_NATIONALITY(HttpStatus.BAD_REQUEST, "INVALID_NATIONALITY", "국적은 ISO 3166-1 alpha-2 형식의 2자리 코드여야 합니다."),
-  INVALID_NAME(HttpStatus.BAD_REQUEST, "INVALID_NAME", "이름은 영문 대문자와 공백만 입력 가능합니다."),
+  INVALID_NAME(HttpStatus.BAD_REQUEST, "INVALID_NAME", "이름은 영문 대문자, 공백, 하이픈(-), 어포스트로피(')만 입력 가능합니다."),
 
   MALFORMED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4101", "잘못 구성된 JWT 형식입니다."),
   UNSUPPORTED_JWT_TOKEN(HttpStatus.BAD_REQUEST, "AUTH4102", "지원하지 않는 JWT 형식입니다."),

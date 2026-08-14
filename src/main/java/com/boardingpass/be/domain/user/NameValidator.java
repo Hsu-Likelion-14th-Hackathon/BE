@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public final class NameValidator {
 
-  private static final Pattern ENGLISH_NAME = Pattern.compile("^[A-Z ]+$");
+  private static final Pattern ENGLISH_NAME = Pattern.compile("^[A-Z '-]+$");
 
   private NameValidator() {
   }
