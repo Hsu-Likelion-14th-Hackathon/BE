@@ -50,7 +50,7 @@ public class VisitLog extends BaseEntity {
   @JoinColumn(name = "boarding_pass_id")
   private BoardingPass boardingPass;
 
-  @Column(name = "entry_no", length = 5, nullable = false)
+  @Column(name = "entry_no", length = 10, nullable = false)
   private String entryNo;
 
   @Column(name = "scanned_at", nullable = false)

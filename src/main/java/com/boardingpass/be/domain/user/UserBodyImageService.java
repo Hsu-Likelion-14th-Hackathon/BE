@@ -3,6 +3,7 @@ package com.boardingpass.be.domain.user;
 import com.boardingpass.be.domain.storage.AzureBlobStorageService;
 import com.boardingpass.be.domain.user.dto.BodyImageDeleteResponse;
 import com.boardingpass.be.domain.user.dto.BodyImageResponse;
+import com.boardingpass.be.domain.user.repository.UserRepository;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
 import com.boardingpass.be.global.security.SecurityUtils;

@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Getter
@@ -50,10 +51,12 @@ public class ProductColor extends BaseEntity {
   @Builder.Default
   @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
   @OrderBy("orderNo ASC")
+  @BatchSize(size = 50)
   private List<ProductImage> images = new ArrayList<>();
 
   @Builder.Default
   @OneToMany(mappedBy = "productColor", fetch = FetchType.LAZY)
   @OrderBy("orderNo ASC")
+  @BatchSize(size = 50)
   private List<ProductSize> sizes = new ArrayList<>();
 }

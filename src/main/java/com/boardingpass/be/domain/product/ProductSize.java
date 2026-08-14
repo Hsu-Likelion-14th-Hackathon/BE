@@ -54,6 +54,6 @@ public class ProductSize extends BaseEntity {
   private Integer orderNo;
 
   public boolean hasStock(int quantity) {
-    return this.stock >= quantity;
+    return this.stock != null && this.stock >= quantity;
   }
 }

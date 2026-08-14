@@ -56,4 +56,5 @@ logging:
 openai:
   api-key: ${OPENAI_API_KEY:}
   model: gpt-4o-mini
+  image-model: gpt-image-1
   timeout-seconds: 5

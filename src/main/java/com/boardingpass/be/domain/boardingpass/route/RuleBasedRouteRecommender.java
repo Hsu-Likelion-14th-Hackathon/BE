@@ -16,13 +16,12 @@ public class RuleBasedRouteRecommender implements RouteRecommender {
   private static final Map<String, String> STYLE_TO_FLOOR = Map.of(
       "CLASSIC", "ORIGIN",
       "PRACTICAL", "JOURNEY",
-      "TRENDY", "DIALOGUE",
+      "TRENDY", "EMBLEM",
       "MINIMAL", "HORIZON");
 
   private static final Map<String, Integer> TIME_CUTOFF = Map.of(
       "QUICK", 2,
-      "STANDARD", 3,
-      "FULL", 5);
+      "STANDARD", 3);
 
   @Override
   public List<RecommendedStep> recommend(RouteRecommendCommand command) {
@@ -48,7 +47,11 @@ public class RuleBasedRouteRecommender implements RouteRecommender {
             .findFirst()
             .orElse(primaryCode);
 
-    int cutoff = TIME_CUTOFF.getOrDefault(command.q4Option().getTag(), 3);
+    String q4Tag = command.q4Option().getTag();
+    int cutoff = "FULL".equals(q4Tag)
+        ? floors.size()
+        : TIME_CUTOFF.getOrDefault(q4Tag, 3);
+    cutoff = Math.min(cutoff, floors.size());
 
     LinkedHashSet<String> recommendedCodes = new LinkedHashSet<>();
     recommendedCodes.add(primaryCode);
