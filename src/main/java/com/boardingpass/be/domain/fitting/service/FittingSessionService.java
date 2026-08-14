@@ -8,9 +8,6 @@ import com.boardingpass.be.domain.fitting.FittingStatus;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionCreateRequest;
 import com.boardingpass.be.domain.fitting.dto.FittingSessionResponse;
 import com.boardingpass.be.domain.fitting.entity.FittingSession;
-import com.boardingpass.be.domain.fitting.generator.FittingGenerationCommand;
-import com.boardingpass.be.domain.fitting.generator.FittingGenerationResult;
-import com.boardingpass.be.domain.fitting.generator.FittingImageGenerator;
 import com.boardingpass.be.domain.fitting.repository.FittingSessionRepository;
 import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.product.ProductColorRepository;
@@ -23,6 +20,8 @@ import com.boardingpass.be.global.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +32,8 @@ public class FittingSessionService {
   private final UserRepository userRepository;
   private final ProductColorRepository productColorRepository;
   private final AzureBlobStorageService azureBlobStorageService;
-  private final FittingImageGenerator fittingImageGenerator;
   private final CreditService creditService;
+  private final FittingGenerationExecutor fittingGenerationExecutor;
 
   @Transactional
   public FittingSessionResponse createFittingSession(FittingSessionCreateRequest request) {
@@ -65,7 +64,18 @@ public class FittingSessionService {
         "가상 피팅"
     );
 
+    scheduleGenerationAfterCommit(session.getId());
+
     return FittingSessionResponse.from(session);
+  }
+
+  private void scheduleGenerationAfterCommit(Long fittingSessionId) {
+    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+      @Override
+      public void afterCommit() {
+        fittingGenerationExecutor.generate(fittingSessionId);
+      }
+    });
   }
 
   private String resolveSourceImageUrl(String fileKey, User user) {
@@ -80,41 +90,11 @@ public class FittingSessionService {
     return user.getDefaultBodyImageUrl();
   }
 
-  @Transactional
   public FittingSessionResponse getFittingSession(Long fittingSessionId) {
     Long userId = SecurityUtils.getCurrentUserId();
     FittingSession session = fittingSessionRepository.findByIdAndUserId(fittingSessionId, userId)
         .orElseThrow(() -> new GeneralException(ErrorStatus.FITTING_SESSION_NOT_FOUND));
 
-    if (session.getStatus() == FittingStatus.PENDING) {
-      processGeneration(session);
-    }
-
     return FittingSessionResponse.from(session);
-  }
-
-  private void processGeneration(FittingSession session) {
-    FittingGenerationResult result = fittingImageGenerator.generate(
-        new FittingGenerationCommand(session.getSourceImageUrl(), session.getProductColor())
-    );
-
-    if (result.success()) {
-      session.complete(result.resultImageUrl());
-      return;
-    }
-
-    session.fail();
-    refundCredit(session);
-  }
-
-  private void refundCredit(FittingSession session) {
-    creditService.earn(
-        session.getUser().getId(),
-        session.getCreditCost(),
-        CreditReason.REFUND,
-        CreditRefType.FITTING_SESSION,
-        session.getId(),
-        "가상 피팅 실패 환급"
-    );
   }
 }
