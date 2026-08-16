@@ -3,6 +3,7 @@ package com.boardingpass.be.domain.auth.kakao;
 import com.boardingpass.be.global.apiPayload.code.status.ErrorStatus;
 import com.boardingpass.be.global.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class KakaoAuthClient {
@@ -26,6 +28,9 @@ public class KakaoAuthClient {
 
   @Value("${kakao.client-id}")
   private String clientId;
+
+  @Value("${kakao.client-secret:}")
+  private String clientSecret;
 
   public KakaoUserInfo authenticate(String code, String redirectUri) {
     String kakaoAccessToken = requestAccessToken(code, redirectUri);
@@ -41,6 +46,9 @@ public class KakaoAuthClient {
     body.add("client_id", clientId);
     body.add("redirect_uri", redirectUri);
     body.add("code", code);
+    if (clientSecret != null && !clientSecret.isBlank()) {
+      body.add("client_secret", clientSecret);
+    }
 
     try {
       ResponseEntity<KakaoTokenResponse> response = restTemplate.postForEntity(
@@ -52,6 +60,7 @@ public class KakaoAuthClient {
       }
       return tokenResponse.accessToken();
     } catch (RestClientException e) {
+      log.warn("카카오 토큰 발급에 실패했습니다.", e);
       throw new GeneralException(ErrorStatus.KAKAO_AUTH_FAILED);
     }
   }
@@ -72,6 +81,7 @@ public class KakaoAuthClient {
       String email = userInfo.kakaoAccount() != null ? userInfo.kakaoAccount().email() : null;
       return new KakaoUserInfo(String.valueOf(userInfo.id()), email);
     } catch (RestClientException e) {
+      log.warn("카카오 사용자 정보 조회에 실패했습니다.", e);
       throw new GeneralException(ErrorStatus.KAKAO_AUTH_FAILED);
     }
   }
