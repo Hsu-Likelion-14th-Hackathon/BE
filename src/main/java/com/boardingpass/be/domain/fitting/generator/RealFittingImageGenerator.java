@@ -38,11 +38,13 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   private static final String EDIT_URI = "https://api.openai.com/v1/images/edits";
   private static final String PROMPT_TEMPLATE_WITH_REFERENCE = """
       Photorealistic edit of the first attached photo (the person). The second attached \
-      photo shows the actual MCM "%s" in %s color. Copy that reference photo's item \
-      exactly — same silhouette, proportions, structure, and overall shape; same color \
-      and any gradient or color transition across the item exactly as shown; same \
-      texture, pattern, logo placement, and hardware. Do not invent, simplify, flatten a \
-      gradient into a solid color, or otherwise alter the product's appearance in any way.
+      photo shows the actual MCM "%s". Copy that reference photo's item exactly — same \
+      silhouette, proportions, structure, and overall shape; same texture, pattern, logo \
+      placement, and hardware. Take the color(s) only from what is visibly shown in that \
+      reference photo, including any gradient or color transition across the item exactly \
+      as shown — ignore any color name mentioned elsewhere, since the reference photo is \
+      the source of truth for color. Do not invent, simplify, flatten a gradient into a \
+      solid color, or otherwise alter the product's appearance in any way.
 
       First, look at the second (reference) photo itself to determine what kind of \
       fashion item this actually is and its actual shape and type — do not guess this \
