@@ -204,7 +204,8 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
         return null;
       }
       if (process.exitValue() != 0) {
-        log.warn("ffmpeg 이미지 변환에 실패했습니다. exitCode={}", process.exitValue());
+        String output = new String(process.getInputStream().readAllBytes());
+        log.warn("ffmpeg 이미지 변환에 실패했습니다. exitCode={}, output={}", process.exitValue(), output);
         return null;
       }
 
