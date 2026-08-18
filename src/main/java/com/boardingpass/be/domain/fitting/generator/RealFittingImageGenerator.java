@@ -38,19 +38,24 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   private static final String EDIT_URI = "https://api.openai.com/v1/images/edits";
   private static final String PROMPT_TEMPLATE_WITH_REFERENCE = """
       Photorealistic edit of the first attached photo (the person). The second attached \
-      photo shows the actual MCM "%s" in %s color. Copy that reference photo's item \
-      exactly — same silhouette, proportions, structure, and overall shape; same color \
-      and any gradient or color transition across the item exactly as shown; same \
-      texture, pattern, logo placement, and hardware. Do not invent, simplify, flatten a \
-      gradient into a solid color, or otherwise alter the product's appearance in any way.
+      photo shows the actual MCM "%s". Copy that reference photo's item exactly — same \
+      silhouette, proportions, structure, and overall shape; same texture, pattern, logo \
+      placement, and hardware. Take the color(s) only from what is visibly shown in that \
+      reference photo, including any gradient or color transition across the item exactly \
+      as shown — ignore any color name mentioned elsewhere, since the reference photo is \
+      the source of truth for color. Do not invent, simplify, flatten a gradient into a \
+      solid color, or otherwise alter the product's appearance in any way.
 
-      First, determine what kind of fashion item this is based on its name, then edit \
-      the first photo so the person is naturally wearing or carrying it, following these \
-      placement rules:
+      First, look at the second (reference) photo itself to determine what kind of \
+      fashion item this actually is and its actual shape and type — do not guess this \
+      from the product name alone. Then edit the first photo so the person is naturally \
+      wearing or carrying that exact item, following these placement rules:
 
-      - Bag: judge its apparent size from the name. A large bag (tote, shopper, weekender, \
-      duffel, backpack, etc.) should be worn over one shoulder or carried by its top handle. \
-      A small bag, mini bag, handbag, clutch, or wallet should be held in one hand.
+      - Bag: judge its type and apparent size from the reference photo, not the name. \
+      A large bag (tote, shopper, weekender, duffel, backpack, etc.) should be worn over \
+      one shoulder or carried by its top handle, matching how it is shown in the \
+      reference photo. A small bag, mini bag, handbag, clutch, or wallet should be held \
+      in one hand.
       - Clothing: determine whether it is a top or a bottom, and show it worn on the correct \
       body region (top on the torso/arms, bottom on the legs/waist) in a natural wearing \
       shot. If it is short-sleeved or short-length (shorts), make sure the skin that would \
