@@ -36,70 +36,35 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 public class RealFittingImageGenerator implements FittingImageGenerator {
 
   private static final String EDIT_URI = "https://api.openai.com/v1/images/edits";
-  private static final String PROMPT_TEMPLATE_WITH_REFERENCE = """
+  private static final String PROMPT = """
       Photorealistic edit of the first attached photo (the person). The second attached \
-      photo shows the actual MCM "%s". Copy that reference photo's item exactly — same \
-      silhouette, proportions, structure, and overall shape; same texture, pattern, logo \
-      placement, and hardware. Take the color(s) only from what is visibly shown in that \
-      reference photo, including any gradient or color transition across the item exactly \
-      as shown — ignore any color name mentioned elsewhere, since the reference photo is \
-      the source of truth for color. Do not invent, simplify, flatten a gradient into a \
-      solid color, or otherwise alter the product's appearance in any way.
+      photo shows the exact product to be added to the image.
 
-      First, look at the second (reference) photo itself to determine what kind of \
-      fashion item this actually is and its actual shape and type — do not guess this \
-      from the product name alone. Then edit the first photo so the person is naturally \
-      wearing or carrying that exact item, following these placement rules:
+      Treat the second image as the source of truth for the product's appearance. \
+      Reproduce that exact product, preserving its silhouette, proportions, structure, \
+      colors and color distribution, pattern, logo placement, material, texture, and \
+      hardware. Use only the colors visibly shown in the reference image, including any \
+      gradients or color transitions. Do not redesign, simplify, recolor, substitute, or \
+      create a similar product.
 
-      - Bag: judge its type and apparent size from the reference photo, not the name. \
-      A large bag (tote, shopper, weekender, duffel, backpack, etc.) should be worn over \
-      one shoulder or carried by its top handle, matching how it is shown in the \
-      reference photo. A small bag, mini bag, handbag, clutch, or wallet should be held \
-      in one hand.
-      - Clothing: determine whether it is a top or a bottom, and show it worn on the correct \
-      body region (top on the torso/arms, bottom on the legs/waist) in a natural wearing \
-      shot. If it is short-sleeved or short-length (shorts), make sure the skin that would \
-      be exposed - not covered by the garment - is clearly visible and rendered to match \
-      the person's own skin tone as seen elsewhere in the original photo (e.g. their face, \
-      hands, or other exposed areas), not covered by anything that isn't actually part of \
-      the item.
-      - Scarf: wrap it naturally around the neck.
-      - Footwear: determine whether it is a sandal/slide or a closed shoe (sneakers, boots, \
-      loafers, etc.) and show it worn on the feet. If it is a sandal or slide, make sure the \
-      parts of the foot not covered by the straps are clearly visible and rendered to match \
-      the person's own skin tone as seen elsewhere in the original photo.
+      First, inspect the second image to determine what type of fashion item it actually \
+      is and how it should naturally be worn, carried, or placed. Do not rely on the \
+      product name alone.
 
-      Keep the person's face, hair, body proportions, pose, skin tone, and background \
-      exactly as they are in the first photo. Do not alter anything else about the photo. \
-      High quality, realistic lighting and shadows consistent with the original photo.
-      """;
-  private static final String PROMPT_TEMPLATE_NO_REFERENCE = """
-      Photorealistic edit of the attached photo. The item is the MCM "%s" in %s color.
+      Apply the exact product naturally to the person with realistic scale, perspective, \
+      lighting, shadows, and physical interaction with the person's body or clothing.
 
-      First, determine what kind of fashion item this is based on its name, then edit \
-      the photo so the person is naturally wearing or carrying it, following these \
-      placement rules:
+      For bags, use the carrying method appropriate to the bag's actual shape and size. \
+      For clothing, place it on the correct body region. For scarves, wrap it naturally \
+      around the neck. For footwear, place it naturally on the feet with correct scale \
+      and orientation.
 
-      - Bag: judge its apparent size from the name. A large bag (tote, shopper, weekender, \
-      duffel, backpack, etc.) should be worn over one shoulder or carried by its top handle. \
-      A small bag, mini bag, handbag, clutch, or wallet should be held in one hand.
-      - Clothing: determine whether it is a top or a bottom, and show it worn on the correct \
-      body region (top on the torso/arms, bottom on the legs/waist) in a natural wearing \
-      shot. If it is short-sleeved or short-length (shorts), make sure the skin that would \
-      be exposed - not covered by the garment - is clearly visible and rendered to match \
-      the person's own skin tone as seen elsewhere in the original photo (e.g. their face, \
-      hands, or other exposed areas), not covered by anything that isn't actually part of \
-      the item.
-      - Scarf: wrap it naturally around the neck.
-      - Footwear: determine whether it is a sandal/slide or a closed shoe (sneakers, boots, \
-      loafers, etc.) and show it worn on the feet. If it is a sandal or slide, make sure the \
-      parts of the foot not covered by the straps are clearly visible and rendered to match \
-      the person's own skin tone as seen elsewhere in the original photo.
+      Keep the person's face, hair, body proportions, pose, skin tone, clothing, \
+      background, and composition unchanged. Do not alter anything unrelated to applying \
+      the product.
 
-      Keep the person's face, hair, body proportions, pose, skin tone, and background \
-      exactly as they are in the original image. Do not alter anything else about the \
-      photo. High quality, realistic lighting and shadows consistent with the original \
-      photo.
+      The final image should look like the exact product from the second reference image \
+      was physically present in the original photograph.
       """;
 
   private final WebClient webClient;
@@ -131,8 +96,12 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
       String productImageUrl = resolveProductImageUrl(command.productColor());
       FetchedImage productImage =
           productImageUrl != null ? fetchNormalizedProductImage(productImageUrl) : null;
+      if (productImage == null) {
+        log.warn("상품 참고 이미지를 가져오지 못해 가상 피팅 이미지 생성을 건너뜁니다.");
+        return FittingGenerationResult.failure();
+      }
 
-      String b64Image = requestEditedImage(command, sourceImage, productImage);
+      String b64Image = requestEditedImage(sourceImage, productImage);
       byte[] resultBytes = Base64.getDecoder().decode(b64Image);
       String resultUrl = azureBlobStorageService.uploadGeneratedImage(resultBytes, "image/png");
 
@@ -211,22 +180,19 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   }
 
   private String requestEditedImage(
-      FittingGenerationCommand command,
       FetchedImage sourceImage,
       FetchedImage productImage
   ) throws Exception {
     MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
     bodyBuilder.part("model", imageModel);
-    bodyBuilder.part("prompt", buildPrompt(command.productColor(), productImage != null));
+    bodyBuilder.part("prompt", PROMPT);
     bodyBuilder.part("quality", "medium");
     bodyBuilder.part("image[]", new ByteArrayResource(sourceImage.bytes()))
         .filename("person.jpg")
         .contentType(sourceImage.contentType());
-    if (productImage != null) {
-      bodyBuilder.part("image[]", new ByteArrayResource(productImage.bytes()))
-          .filename("product.png")
-          .contentType(productImage.contentType());
-    }
+    bodyBuilder.part("image[]", new ByteArrayResource(productImage.bytes()))
+        .filename("product.png")
+        .contentType(productImage.contentType());
 
     String raw = webClient.post()
         .uri(EDIT_URI)
@@ -244,16 +210,6 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
       throw new IllegalStateException("OpenAI 응답에 이미지 데이터가 없습니다.");
     }
     return b64Image;
-  }
-
-  private String buildPrompt(ProductColor productColor, boolean hasProductReference) {
-    String template = hasProductReference
-        ? PROMPT_TEMPLATE_WITH_REFERENCE
-        : PROMPT_TEMPLATE_NO_REFERENCE;
-    return template.formatted(
-        productColor.getProduct().getName(),
-        productColor.getColorName()
-    );
   }
 
   private record FetchedImage(byte[] bytes, MediaType contentType) {
