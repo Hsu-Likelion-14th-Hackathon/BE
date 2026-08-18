@@ -35,7 +35,7 @@ public class LlmRouteRecommender implements RouteRecommender {
       - 주어진 층 코드 외의 코드를 만들지 말 것
 
       출력은 아래 JSON 형식만:
-      {"reasons":[{"code":"ORIGIN","reason":"..."}]}
+      {"reasons":[{"code":"JOURNEY","reason":"..."}]}
       """;
 
   private final RuleBasedRouteRecommender ruleBasedRouteRecommender;
