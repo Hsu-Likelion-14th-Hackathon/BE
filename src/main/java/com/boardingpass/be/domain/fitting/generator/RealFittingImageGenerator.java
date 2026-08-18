@@ -38,9 +38,11 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   private static final String EDIT_URI = "https://api.openai.com/v1/images/edits";
   private static final String PROMPT_TEMPLATE_WITH_REFERENCE = """
       Photorealistic edit of the first attached photo (the person). The second attached \
-      photo shows the actual MCM "%s" in %s color — use its exact design, shape, color, \
-      texture, logo placement, and hardware exactly as shown in that reference photo. Do \
-      not invent or alter the product's appearance.
+      photo shows the actual MCM "%s" in %s color. Copy that reference photo's item \
+      exactly — same silhouette, proportions, structure, and overall shape; same color \
+      and any gradient or color transition across the item exactly as shown; same \
+      texture, pattern, logo placement, and hardware. Do not invent, simplify, flatten a \
+      gradient into a solid color, or otherwise alter the product's appearance in any way.
 
       First, determine what kind of fashion item this is based on its name, then edit \
       the first photo so the person is naturally wearing or carrying it, following these \
@@ -102,7 +104,7 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   @Value("${openai.api-key:}")
   private String apiKey;
 
-  @Value("${openai.image-model:gpt-image-1}")
+  @Value("${openai.image-model:gpt-image-2}")
   private String imageModel;
 
   @Value("${openai.timeout-seconds:120}")
