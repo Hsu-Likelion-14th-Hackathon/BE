@@ -62,6 +62,9 @@ dependencies {
 
 	// Azure Blob Storage
 	implementation 'com.azure:azure-storage-blob:12.29.0'
+
+	// CMYK JPEG 등 자바 표준 ImageIO가 못 읽는 포맷 지원
+	runtimeOnly 'com.twelvemonkeys.imageio:imageio-jpeg:3.11.0'
 }
 
 tasks.named('test') {
