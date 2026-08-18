@@ -5,10 +5,16 @@ import com.boardingpass.be.domain.product.ProductImage;
 import com.boardingpass.be.domain.storage.AzureBlobStorageService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Comparator;
+import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,7 +122,8 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
       }
 
       String productImageUrl = resolveProductImageUrl(command.productColor());
-      FetchedImage productImage = productImageUrl != null ? fetchImage(productImageUrl) : null;
+      FetchedImage productImage =
+          productImageUrl != null ? fetchNormalizedProductImage(productImageUrl) : null;
 
       String b64Image = requestEditedImage(command, sourceImage, productImage);
       byte[] resultBytes = Base64.getDecoder().decode(b64Image);
@@ -152,6 +159,43 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
     return new FetchedImage(bytes, contentType);
   }
 
+  private FetchedImage fetchNormalizedProductImage(String url) {
+    FetchedImage raw = fetchImage(url);
+    if (raw == null) {
+      return null;
+    }
+    byte[] normalized = normalizeToRgbPng(raw.bytes());
+    if (normalized == null) {
+      log.warn("상품 이미지를 표준 형식으로 변환하지 못했습니다: {}", url);
+      return null;
+    }
+    return new FetchedImage(normalized, MediaType.IMAGE_PNG);
+  }
+
+  private byte[] normalizeToRgbPng(byte[] original) {
+    try {
+      BufferedImage source = ImageIO.read(new ByteArrayInputStream(original));
+      if (source == null) {
+        return null;
+      }
+
+      BufferedImage rgbImage = new BufferedImage(
+          source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_RGB);
+      Graphics2D graphics = rgbImage.createGraphics();
+      graphics.setColor(Color.WHITE);
+      graphics.fillRect(0, 0, source.getWidth(), source.getHeight());
+      graphics.drawImage(source, 0, 0, null);
+      graphics.dispose();
+
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      ImageIO.write(rgbImage, "png", output);
+      return output.toByteArray();
+    } catch (Exception e) {
+      log.warn("이미지 정규화에 실패했습니다.", e);
+      return null;
+    }
+  }
+
   private String resolveProductImageUrl(ProductColor productColor) {
     return productColor.getImages().stream()
         .min(Comparator.comparing(ProductImage::getOrderNo))
@@ -173,7 +217,7 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
         .contentType(sourceImage.contentType());
     if (productImage != null) {
       bodyBuilder.part("image[]", new ByteArrayResource(productImage.bytes()))
-          .filename("product.jpg")
+          .filename("product.png")
           .contentType(productImage.contentType());
     }
 
