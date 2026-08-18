@@ -30,7 +30,11 @@ public class FloorService {
         .map(FloorSummaryResponse::from)
         .toList();
 
-    return FloorListResponse.of(store.getName(), floors);
+    return FloorListResponse.of(
+        store.getName(),
+        store.getIntroAudioUrl(),
+        store.getGuideAudioUrl(),
+        floors);
   }
 
   public FloorDetailResponse getFloorDetail(Long floorId) {
