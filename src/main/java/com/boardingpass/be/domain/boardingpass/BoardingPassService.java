@@ -113,8 +113,6 @@ public class BoardingPassService {
             validated.q2Option(),
             validated.q3Option(),
             validated.q4Option(),
-            validated.q5Option(),
-            validated.textAnswer(),
             productNames));
     saveRouteSteps(boardingPass, steps);
 
@@ -251,7 +249,6 @@ public class BoardingPassService {
     }
 
     Map<Long, SurveyOption> selectedOptionByQuestionId = new HashMap<>();
-    String textAnswer = null;
 
     for (SurveyAnswerRequest answer : answerByQuestionId.values()) {
       SurveyQuestion question = questionById.get(answer.surveyQuestionId());
@@ -273,21 +270,18 @@ public class BoardingPassService {
         if (answer.surveyOptionId() != null) {
           throw new GeneralException(ErrorStatus.INVALID_SURVEY_ANSWER);
         }
-        textAnswer = rawText;
       }
     }
 
     SurveyOption q2 = requiredOptionByStep(activeQuestions, selectedOptionByQuestionId, 2);
     SurveyOption q3 = requiredOptionByStep(activeQuestions, selectedOptionByQuestionId, 3);
     SurveyOption q4 = requiredOptionByStep(activeQuestions, selectedOptionByQuestionId, 4);
-    SurveyOption q5 = requiredOptionByStep(activeQuestions, selectedOptionByQuestionId, 5);
 
     return new ValidatedSurvey(
         activeQuestions,
         answerByQuestionId,
         selectedOptionByQuestionId,
-        textAnswer,
-        q2, q3, q4, q5);
+        q2, q3, q4);
   }
 
   private SurveyOption requiredOptionByStep(
@@ -316,8 +310,7 @@ public class BoardingPassService {
               .boardingPass(boardingPass)
               .surveyQuestion(question)
               .surveyOption(validated.selectedOptionByQuestionId().get(question.getId()))
-              .textAnswer(
-                  question.getQuestionType() == QuestionType.TEXT ? validated.textAnswer() : null)
+              .textAnswer(null)
               .build());
     }
   }
@@ -432,10 +425,8 @@ public class BoardingPassService {
       List<SurveyQuestion> activeQuestions,
       Map<Long, SurveyAnswerRequest> answerByQuestionId,
       Map<Long, SurveyOption> selectedOptionByQuestionId,
-      String textAnswer,
       SurveyOption q2Option,
       SurveyOption q3Option,
-      SurveyOption q4Option,
-      SurveyOption q5Option) {
+      SurveyOption q4Option) {
   }
 }
