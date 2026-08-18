@@ -63,7 +63,7 @@ public class AuthService {
     }
 
     String accessToken = jwtProvider.generateAccessToken(user.getId());
-    return new KakaoLoginResponse(accessToken, isNewUser, user.getId());
+    return new KakaoLoginResponse(accessToken, isNewUser, user.getId(), user.getName() != null);
   }
 
   @Transactional
