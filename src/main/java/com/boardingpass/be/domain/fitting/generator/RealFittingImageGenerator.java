@@ -11,9 +11,12 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -159,6 +162,9 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
     try {
       BufferedImage source = ImageIO.read(new ByteArrayInputStream(original));
       if (source == null) {
+        source = decodeWithFfmpeg(original);
+      }
+      if (source == null) {
         return null;
       }
 
@@ -176,6 +182,36 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
     } catch (Exception e) {
       log.warn("이미지 정규화에 실패했습니다.", e);
       return null;
+    }
+  }
+
+  private BufferedImage decodeWithFfmpeg(byte[] original) throws Exception {
+    Path inputPath = Files.createTempFile("fitting-src-", ".bin");
+    Path outputPath = Files.createTempFile("fitting-out-", ".png");
+    try {
+      Files.write(inputPath, original);
+
+      Process process = new ProcessBuilder(
+          "ffmpeg", "-y", "-i", inputPath.toString(),
+          "-frames:v", "1", outputPath.toString())
+          .redirectErrorStream(true)
+          .start();
+
+      boolean finished = process.waitFor(30, TimeUnit.SECONDS);
+      if (!finished) {
+        process.destroyForcibly();
+        log.warn("ffmpeg 이미지 변환이 시간 내에 끝나지 않았습니다.");
+        return null;
+      }
+      if (process.exitValue() != 0) {
+        log.warn("ffmpeg 이미지 변환에 실패했습니다. exitCode={}", process.exitValue());
+        return null;
+      }
+
+      return ImageIO.read(outputPath.toFile());
+    } finally {
+      Files.deleteIfExists(inputPath);
+      Files.deleteIfExists(outputPath);
     }
   }
 
