@@ -44,13 +44,16 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
       texture, pattern, logo placement, and hardware. Do not invent, simplify, flatten a \
       gradient into a solid color, or otherwise alter the product's appearance in any way.
 
-      First, determine what kind of fashion item this is based on its name, then edit \
-      the first photo so the person is naturally wearing or carrying it, following these \
-      placement rules:
+      First, look at the second (reference) photo itself to determine what kind of \
+      fashion item this actually is and its actual shape and type — do not guess this \
+      from the product name alone. Then edit the first photo so the person is naturally \
+      wearing or carrying that exact item, following these placement rules:
 
-      - Bag: judge its apparent size from the name. A large bag (tote, shopper, weekender, \
-      duffel, backpack, etc.) should be worn over one shoulder or carried by its top handle. \
-      A small bag, mini bag, handbag, clutch, or wallet should be held in one hand.
+      - Bag: judge its type and apparent size from the reference photo, not the name. \
+      A large bag (tote, shopper, weekender, duffel, backpack, etc.) should be worn over \
+      one shoulder or carried by its top handle, matching how it is shown in the \
+      reference photo. A small bag, mini bag, handbag, clutch, or wallet should be held \
+      in one hand.
       - Clothing: determine whether it is a top or a bottom, and show it worn on the correct \
       body region (top on the torso/arms, bottom on the legs/waist) in a natural wearing \
       shot. If it is short-sleeved or short-length (shorts), make sure the skin that would \
