@@ -66,7 +66,7 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   @Value("${openai.image-model:gpt-image-1}")
   private String imageModel;
 
-  @Value("${openai.timeout-seconds:5}")
+  @Value("${openai.timeout-seconds:60}")
   private long timeoutSeconds;
 
   @Override
