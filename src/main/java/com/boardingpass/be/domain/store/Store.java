@@ -34,4 +34,10 @@ public class Store extends BaseEntity {
 
   @Column(name = "floor_count")
   private Integer floorCount;
+
+  @Column(name = "intro_audio_url", columnDefinition = "TEXT")
+  private String introAudioUrl;
+
+  @Column(name = "guide_audio_url", columnDefinition = "TEXT")
+  private String guideAudioUrl;
 }
