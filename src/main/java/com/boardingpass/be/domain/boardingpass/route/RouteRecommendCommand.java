@@ -9,8 +9,6 @@ public record RouteRecommendCommand(
     SurveyOption q2Option,
     SurveyOption q3Option,
     SurveyOption q4Option,
-    SurveyOption q5Option,
-    String textAnswer,
     List<String> productNames
 ) {
 }

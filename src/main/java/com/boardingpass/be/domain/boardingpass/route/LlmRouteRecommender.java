@@ -35,7 +35,7 @@ public class LlmRouteRecommender implements RouteRecommender {
       - 주어진 층 코드 외의 코드를 만들지 말 것
 
       출력은 아래 JSON 형식만:
-      {"reasons":[{"code":"ORIGIN","reason":"..."}]}
+      {"reasons":[{"code":"JOURNEY","reason":"..."}]}
       """;
 
   private final RuleBasedRouteRecommender ruleBasedRouteRecommender;
@@ -93,8 +93,7 @@ public class LlmRouteRecommender implements RouteRecommender {
 
   private Map<String, String> callOpenAi(
       RouteRecommendCommand command,
-      List<RecommendedStep> recommended
-  ) throws Exception {
+      List<RecommendedStep> recommended) throws Exception {
     String userContent = buildUserContent(command, recommended);
 
     Map<String, Object> body = Map.of(
@@ -102,9 +101,7 @@ public class LlmRouteRecommender implements RouteRecommender {
         "response_format", Map.of("type", "json_object"),
         "messages", List.of(
             Map.of("role", "system", "content", SYSTEM_PROMPT),
-            Map.of("role", "user", "content", userContent)
-        )
-    );
+            Map.of("role", "user", "content", userContent)));
 
     String raw = webClient.post()
         .uri("https://api.openai.com/v1/chat/completions")
@@ -156,8 +153,6 @@ public class LlmRouteRecommender implements RouteRecommender {
         - Q2: %s
         - Q3: %s
         - Q4: %s
-        - Q5: %s
-        - Q6: %s
 
         스냅샷 상품: %s
         """.formatted(
@@ -165,10 +160,7 @@ public class LlmRouteRecommender implements RouteRecommender {
         command.q2Option().getLabel(),
         command.q3Option().getLabel(),
         command.q4Option().getLabel(),
-        command.q5Option().getLabel(),
-        nullToEmpty(command.textAnswer()),
-        products.isBlank() ? "없음" : products
-    );
+        products.isBlank() ? "없음" : products);
   }
 
   private static String nullToEmpty(String value) {
