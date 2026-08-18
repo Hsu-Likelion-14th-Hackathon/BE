@@ -61,4 +61,4 @@ openai:
   api-key: ${OPENAI_API_KEY:}
   model: gpt-4o-mini
   image-model: gpt-image-1
-  timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:60}
+  timeout-seconds: ${OPENAI_TIMEOUT_SECONDS:90}
