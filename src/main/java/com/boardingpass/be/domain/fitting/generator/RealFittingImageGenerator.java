@@ -66,7 +66,7 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
   @Value("${openai.image-model:gpt-image-1}")
   private String imageModel;
 
-  @Value("${openai.timeout-seconds:60}")
+  @Value("${openai.timeout-seconds:90}")
   private long timeoutSeconds;
 
   @Override
@@ -111,6 +111,7 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
     MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
     bodyBuilder.part("model", imageModel);
     bodyBuilder.part("prompt", buildPrompt(command.productColor()));
+    bodyBuilder.part("quality", "medium");
     bodyBuilder.part("image", new ByteArrayResource(sourceBytes))
         .filename("source.jpg")
         .contentType(sourceContentType);
