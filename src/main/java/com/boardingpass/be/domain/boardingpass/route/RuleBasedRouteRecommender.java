@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 public class RuleBasedRouteRecommender implements RouteRecommender {
 
   private static final Map<String, String> STYLE_TO_FLOOR = Map.of(
-      "CLASSIC", "ORIGIN",
+      "CLASSIC", "ARRIVE", // was ORIGIN — 5F 도착
       "PRACTICAL", "JOURNEY",
       "TRENDY", "EMBLEM",
-      "MINIMAL", "HORIZON");
+      "MINIMAL", "TRY"); // was HORIZON — 3F 시도
 
   private static final Map<String, Integer> TIME_CUTOFF = Map.of(
       "QUICK", 2,
