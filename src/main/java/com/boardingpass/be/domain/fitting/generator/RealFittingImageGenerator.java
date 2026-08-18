@@ -4,6 +4,7 @@ import com.boardingpass.be.domain.product.ProductColor;
 import com.boardingpass.be.domain.storage.AzureBlobStorageService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
@@ -77,7 +78,7 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
 
     try {
       ResponseEntity<byte[]> sourceResponse = webClient.get()
-          .uri(command.sourceImageUrl())
+          .uri(URI.create(command.sourceImageUrl()))
           .retrieve()
           .toEntity(byte[].class)
           .timeout(Duration.ofSeconds(timeoutSeconds))
