@@ -94,10 +94,15 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
       }
 
       String productImageUrl = resolveProductImageUrl(command.productColor());
-      FetchedImage productImage =
-          productImageUrl != null ? fetchNormalizedProductImage(productImageUrl) : null;
+      if (productImageUrl == null) {
+        log.warn("productColor={}에 등록된 이미지가 없어 가상 피팅 이미지 생성을 건너뜁니다.",
+            command.productColor().getId());
+        return FittingGenerationResult.failure();
+      }
+
+      FetchedImage productImage = fetchNormalizedProductImage(productImageUrl);
       if (productImage == null) {
-        log.warn("상품 참고 이미지를 가져오지 못해 가상 피팅 이미지 생성을 건너뜁니다.");
+        log.warn("상품 참고 이미지를 가져오지 못해 가상 피팅 이미지 생성을 건너뜁니다. url={}", productImageUrl);
         return FittingGenerationResult.failure();
       }
 
@@ -126,6 +131,8 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
 
     byte[] bytes = response != null ? response.getBody() : null;
     if (bytes == null || bytes.length == 0) {
+      log.warn("이미지 다운로드 결과가 비어있습니다. url={}, status={}",
+          url, response != null ? response.getStatusCode() : null);
       return null;
     }
     MediaType contentType = response.getHeaders().getContentType() != null
