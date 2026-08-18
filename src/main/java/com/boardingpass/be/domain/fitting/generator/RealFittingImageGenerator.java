@@ -21,6 +21,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Slf4j
 @Primary
@@ -122,6 +123,10 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
       String resultUrl = azureBlobStorageService.uploadGeneratedImage(resultBytes, "image/png");
 
       return FittingGenerationResult.success(resultUrl);
+    } catch (WebClientResponseException e) {
+      log.warn("AI 가상 피팅 이미지 생성에 실패했습니다. status={}, body={}",
+          e.getStatusCode(), e.getResponseBodyAsString(), e);
+      return FittingGenerationResult.failure();
     } catch (Exception e) {
       log.warn("AI 가상 피팅 이미지 생성에 실패했습니다.", e);
       return FittingGenerationResult.failure();
