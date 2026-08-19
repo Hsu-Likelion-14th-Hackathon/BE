@@ -1,5 +1,5 @@
 FROM eclipse-temurin:21-jdk-jammy
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg libavif-bin \
     && rm -rf /var/lib/apt/lists/*
 ARG JAR_FILE=build/libs/*-SNAPSHOT.jar
 COPY ${JAR_FILE} app.jar
