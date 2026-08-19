@@ -162,6 +162,9 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
     try {
       BufferedImage source = ImageIO.read(new ByteArrayInputStream(original));
       if (source == null) {
+        source = decodeWithAvifDec(original);
+      }
+      if (source == null) {
         source = decodeWithFfmpeg(original);
       }
       if (source == null) {
@@ -182,6 +185,36 @@ public class RealFittingImageGenerator implements FittingImageGenerator {
     } catch (Exception e) {
       log.warn("이미지 정규화에 실패했습니다.", e);
       return null;
+    }
+  }
+
+  private BufferedImage decodeWithAvifDec(byte[] original) throws Exception {
+    Path inputPath = Files.createTempFile("fitting-src-", ".avif");
+    Path outputPath = Files.createTempFile("fitting-out-", ".png");
+    try {
+      Files.write(inputPath, original);
+
+      Process process = new ProcessBuilder(
+          "avifdec", inputPath.toString(), outputPath.toString())
+          .redirectErrorStream(true)
+          .start();
+
+      boolean finished = process.waitFor(30, TimeUnit.SECONDS);
+      if (!finished) {
+        process.destroyForcibly();
+        log.warn("avifdec 이미지 변환이 시간 내에 끝나지 않았습니다.");
+        return null;
+      }
+      if (process.exitValue() != 0) {
+        String output = new String(process.getInputStream().readAllBytes());
+        log.warn("avifdec 이미지 변환에 실패했습니다. exitCode={}, output={}", process.exitValue(), output);
+        return null;
+      }
+
+      return ImageIO.read(outputPath.toFile());
+    } finally {
+      Files.deleteIfExists(inputPath);
+      Files.deleteIfExists(outputPath);
     }
   }
 
